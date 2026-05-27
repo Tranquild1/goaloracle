@@ -195,19 +195,18 @@ const ABI = [
   "function claimWinnings(uint256)",
   "function claimRefund(uint256)",
   "function createMatch(string,string,string,string,uint64) returns (uint256)",
-  "function owner() view returns (address)",
   "function openMatch(uint256)",
   "event MatchCreated(uint256 indexed matchId,string home,string away,uint64 kickoff)",
 ];
 
 // World Cup 2026 matches to seed
 const MATCHES_TO_SEED = [
-  {home:"Brazil",away:"Germany",hf:"🇧🇷",af:"🇩🇪",kickoff:1750100400},
-  {home:"France",away:"Argentina",hf:"🇫🇷",af:"🇦🇷",kickoff:1750172400},
-  {home:"England",away:"Spain",hf:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",af:"🇪🇸",kickoff:1750273200},
-  {home:"Portugal",away:"Japan",hf:"🇵🇹",af:"🇯🇵",kickoff:1750345200},
-  {home:"Netherlands",away:"USA",hf:"🇳🇱",af:"🇺🇸",kickoff:1750446000},
-  {home:"Morocco",away:"Mexico",hf:"🇲🇦",af:"🇲🇽",kickoff:1750518000},
+  {home:"Brazil",away:"Germany",hf:"🇧🇷",af:"🇩🇪",kickoff:1781632800},
+  {home:"France",away:"Argentina",hf:"🇫🇷",af:"🇦🇷",kickoff:1781708400},
+  {home:"England",away:"Spain",hf:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",af:"🇪🇸",kickoff:1781805600},
+  {home:"Portugal",away:"Japan",hf:"🇵🇹",af:"🇯🇵",kickoff:1781881200},
+  {home:"Netherlands",away:"USA",hf:"🇳🇱",af:"🇺🇸",kickoff:1781978400},
+  {home:"Morocco",away:"Mexico",hf:"🇲🇦",af:"🇲🇽",kickoff:1782054000},
 ];
 </script>
 
@@ -256,7 +255,7 @@ const MATCHES_TO_SEED = [
   <div class="tab active" onclick="switchTab('predict',this)">⚽ Predict</div>
   <div class="tab" onclick="switchTab('leaderboard',this)">🏆 Leaderboard</div>
   <div class="tab" onclick="switchTab('oracle',this)">🤖 AI Oracle</div>
-  <div class="tab" id="admin-tab" style="display:none" onclick="switchTab('admin',this)">⚙️ Admin</div>
+  <div class="tab" onclick="switchTab('admin',this)">⚙️ Admin</div>
 </div>
 
 <!-- PREDICT -->
@@ -389,15 +388,6 @@ async function connectWallet() {
     loadStats();
     loadLeaderboard();
     showToast("Wallet connected ✓");
-
-    // Show admin tab only for contract owner
-    try {
-      const c = getReadContract();
-      const owner = await c.owner();
-      if (userAddress.toLowerCase() === owner.toLowerCase()) {
-        document.getElementById("admin-tab").style.display = "block";
-      }
-    } catch(e) { console.log("owner check failed", e); }
   } catch(e) {
     showToast("Connection failed: "+e.message, true);
   }
