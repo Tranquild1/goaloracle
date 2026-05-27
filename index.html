@@ -182,6 +182,7 @@ const XLAYER_CHAIN_ID = 196;
 const XLAYER_RPC = "https://rpc.xlayer.tech";
 
 const ABI = [
+  "function owner() view returns (address)",
   "function matchCount() view returns (uint256)",
   "function totalVolume() view returns (uint256)",
   "function playerCount() view returns (uint256)",
@@ -255,7 +256,7 @@ const MATCHES_TO_SEED = [
   <div class="tab active" onclick="switchTab('predict',this)">⚽ Predict</div>
   <div class="tab" onclick="switchTab('leaderboard',this)">🏆 Leaderboard</div>
   <div class="tab" onclick="switchTab('oracle',this)">🤖 AI Oracle</div>
-  <div class="tab" onclick="switchTab('admin',this)">⚙️ Admin</div>
+  <div class="tab" id="admin-tab" style="display:none" onclick="switchTab('admin',this)">⚙️ Admin</div>
 </div>
 
 <!-- PREDICT -->
@@ -384,6 +385,14 @@ async function connectWallet() {
     document.getElementById("wallet-bal").textContent = parseFloat(ethers.formatEther(bal)).toFixed(3)+" OKB";
     document.getElementById("connect-btn").textContent = "Connected";
     document.getElementById("connect-btn").classList.add("connected");
+
+    // Show Admin tab only if connected wallet is the contract owner
+    try {
+      const ownerAddr = await contract.owner();
+      if (userAddress.toLowerCase() === ownerAddr.toLowerCase()) {
+        document.getElementById("admin-tab").style.display = "";
+      }
+    } catch(e) { console.log("owner check:", e); }
 
     loadStats();
     loadLeaderboard();
