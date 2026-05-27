@@ -453,8 +453,8 @@ async function loadMatches() {
 
 function buildMatchCard(m) {
   const id = m.id.toString();
-  const statusMap = {1:"upcoming",2:"open",0:"upcoming",3:"resolved",4:"cancelled"};
-  const statusLabel = {1:"UPCOMING",2:"OPEN",0:"UPCOMING",3:"RESOLVED",4:"CANCELLED"};
+  const statusMap = {0:"upcoming",1:"open",2:"closed",3:"resolved",4:"cancelled"};
+  const statusLabel = {0:"UPCOMING",1:"OPEN",2:"CLOSED",3:"RESOLVED",4:"CANCELLED"};
   const statusNum = Number(m.status);
   const div = document.createElement("div");
   div.className = "match-card";
@@ -509,7 +509,7 @@ function buildMatchCard(m) {
     </div>
     <div class="stake-row">
       <input class="stake-input" id="stake-${id}" type="number" placeholder="Stake in OKB" min="0.001" step="0.001"/>
-      <button class="predict-btn" id="btn-${id}" onclick="placePrediction('${id}')" ${statusNum!==2?'disabled':''}>Predict ↗</button>
+      <button class="predict-btn" id="btn-${id}" onclick="placePrediction('${id}')" ${statusNum!==1?'disabled':''}>Predict ↗</button>
     </div>
     <div class="payout-est" id="est-${id}">Select outcome + enter stake to see estimated payout</div>
   `;
