@@ -30,7 +30,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 /* HERO */
 .hero{position:relative;padding:0;overflow:hidden;background:var(--bg);}
-.hero-pitch{width:100%;height:320px;background:linear-gradient(180deg,#0a1a0f 0%,#0d2416 40%,#0a1a0f 100%);position:relative;display:flex;align-items:center;justify-content:center;}
+.hero-pitch{width:100%;height:360px;background:linear-gradient(180deg,#0a1a0f 0%,#0d2416 40%,#0a1a0f 100%);position:relative;display:flex;align-items:center;justify-content:center;}
 .pitch-lines{position:absolute;inset:0;opacity:0.15;}
 .pitch-lines svg{width:100%;height:100%;}
 .hero-content{position:relative;z-index:2;text-align:center;padding:2rem;}
@@ -166,10 +166,59 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .footer{text-align:center;padding:2rem;font-size:11px;color:var(--muted);font-family:var(--font-mono);border-top:1px solid var(--border);margin-top:2rem;}
 .footer a{color:var(--green);text-decoration:none;}
 
+/* HERO LOGO */
+.hero-logo{width:72px;height:72px;margin:0 auto 1.2rem;display:flex;align-items:center;justify-content:center;}
+.hero-logo img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 24px rgba(0,201,123,0.45));}
+
+/* FLAG PICKER */
+.flag-picker-btn{display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 11px;border-radius:3px;cursor:pointer;font-size:13px;min-width:80px;transition:border-color 0.2s;outline:none;white-space:nowrap;}
+.flag-picker-btn:hover{border-color:rgba(0,201,123,0.45);}
+.flag-picker-btn .fp-flag{font-size:22px;line-height:1;}
+.flag-picker-btn .fp-name{font-size:11px;font-family:var(--font-mono);color:var(--muted);max-width:80px;overflow:hidden;text-overflow:ellipsis;}
+
+.flag-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center;}
+.flag-modal-overlay.open{display:flex;}
+.flag-modal-box{background:var(--bg2);border:1px solid rgba(0,201,123,0.2);border-radius:6px;width:min(480px,94vw);max-height:72vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.6);}
+.flag-modal-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;}
+.flag-modal-head input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:8px 12px;font-family:var(--font-mono);font-size:13px;color:var(--text);outline:none;}
+.flag-modal-head input:focus{border-color:var(--green);}
+.flag-modal-close{background:transparent;border:1px solid var(--border);color:var(--muted);padding:8px 12px;border-radius:3px;cursor:pointer;font-size:13px;transition:all 0.15s;}
+.flag-modal-close:hover{border-color:var(--red);color:var(--red);}
+.flag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:3px;padding:10px;overflow-y:auto;}
+.flag-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:3px;cursor:pointer;transition:background 0.1s;border:1px solid transparent;}
+.flag-item:hover{background:var(--bg3);border-color:rgba(0,201,123,0.2);}
+.flag-item .fi-flag{font-size:22px;line-height:1;flex-shrink:0;}
+.flag-item .fi-name{font-size:11px;font-family:var(--font-mono);color:var(--muted);}
+.flag-item.active{background:rgba(0,201,123,0.1);border-color:var(--green);}
+.flag-item.active .fi-name{color:var(--green);}
+
+/* API KEY MODAL */
+.apikey-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center;}
+.apikey-overlay.open{display:flex;}
+.apikey-box{background:var(--bg2);border:1px solid rgba(100,90,220,0.3);border-radius:6px;width:min(460px,94vw);padding:22px;box-shadow:0 20px 60px rgba(0,0,0,0.6);}
+.apikey-title{font-family:var(--font-display);font-size:20px;letter-spacing:1px;color:#C4BCFF;margin-bottom:8px;}
+.apikey-desc{font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:14px;}
+.apikey-desc a{color:var(--green);text-decoration:none;}
+.apikey-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:10px 14px;font-family:var(--font-mono);font-size:13px;color:var(--text);outline:none;margin-bottom:10px;}
+.apikey-input:focus{border-color:rgba(100,90,220,0.5);}
+.apikey-row{display:flex;gap:8px;justify-content:flex-end;}
+.apikey-save{background:rgba(100,90,220,0.8);color:#fff;border:none;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;border-radius:3px;transition:all 0.2s;}
+.apikey-save:hover{background:rgba(100,90,220,1);}
+.apikey-cancel{background:transparent;border:1px solid var(--border);color:var(--muted);padding:9px 14px;font-size:13px;cursor:pointer;border-radius:3px;}
+.apikey-notice{background:rgba(100,90,220,0.08);border:1px solid rgba(100,90,220,0.2);border-radius:3px;padding:10px 14px;margin-bottom:1rem;font-size:12px;color:#A89EE8;line-height:1.6;display:flex;gap:8px;align-items:flex-start;}
+.oracle-settings-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 12px;font-size:11px;font-family:var(--font-mono);cursor:pointer;border-radius:2px;float:right;margin-bottom:8px;transition:all 0.2s;}
+.oracle-settings-btn:hover{border-color:rgba(100,90,220,0.4);color:#A89EE8;}
+
+/* DATETIME FIX */
+input[type="datetime-local"]{color-scheme:dark;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:3px;font-family:var(--font-mono);font-size:13px;outline:none;cursor:pointer;}
+input[type="datetime-local"]:focus{border-color:var(--green);}
+input[type="datetime-local"]::-webkit-calendar-picker-indicator{filter:invert(1) brightness(0.6);cursor:pointer;}
+
 @media(max-width:480px){
   .hero h1{font-size:52px;}
   .team-name{font-size:18px;}
   .odds-grid{gap:5px;}
+  .flag-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));}
 }
 </style>
 </head>
@@ -240,6 +289,46 @@ const MATCHES_TO_SEED = [
   {home:"Colombia",    away:"Serbia",       hf:"🇨🇴", af:"🇷🇸", kickoff:1750204800},
   {home:"Switzerland", away:"Norway",       hf:"🇨🇭", af:"🇳🇴", kickoff:1750262400},
 ];
+
+// ── Flag Catalogue (World Cup 2026 nations + others) ──
+const FLAG_CATALOGUE = [
+  {c:"Algeria",f:"🇩🇿"},{c:"Argentina",f:"🇦🇷"},{c:"Australia",f:"🇦🇺"},
+  {c:"Austria",f:"🇦🇹"},{c:"Belgium",f:"🇧🇪"},{c:"Bolivia",f:"🇧🇴"},
+  {c:"Bosnia-Herz",f:"🇧🇦"},{c:"Brazil",f:"🇧🇷"},{c:"Cameroon",f:"🇨🇲"},
+  {c:"Canada",f:"🇨🇦"},{c:"Cape Verde",f:"🇨🇻"},{c:"Chile",f:"🇨🇱"},
+  {c:"Colombia",f:"🇨🇴"},{c:"Costa Rica",f:"🇨🇷"},{c:"Croatia",f:"🇭🇷"},
+  {c:"Curacao",f:"🇨🇼"},{c:"Czechia",f:"🇨🇿"},{c:"Denmark",f:"🇩🇰"},
+  {c:"DR Congo",f:"🇨🇩"},{c:"Ecuador",f:"🇪🇨"},{c:"Egypt",f:"🇪🇬"},
+  {c:"England",f:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"},{c:"France",f:"🇫🇷"},{c:"Germany",f:"🇩🇪"},
+  {c:"Ghana",f:"🇬🇭"},{c:"Greece",f:"🇬🇷"},{c:"Honduras",f:"🇭🇳"},
+  {c:"Hungary",f:"🇭🇺"},{c:"Iran",f:"🇮🇷"},{c:"Italy",f:"🇮🇹"},
+  {c:"Ivory Coast",f:"🇨🇮"},{c:"Jamaica",f:"🇯🇲"},{c:"Japan",f:"🇯🇵"},
+  {c:"Mexico",f:"🇲🇽"},{c:"Morocco",f:"🇲🇦"},{c:"Netherlands",f:"🇳🇱"},
+  {c:"New Zealand",f:"🇳🇿"},{c:"Nigeria",f:"🇳🇬"},{c:"Norway",f:"🇳🇴"},
+  {c:"Panama",f:"🇵🇦"},{c:"Paraguay",f:"🇵🇾"},{c:"Peru",f:"🇵🇪"},
+  {c:"Poland",f:"🇵🇱"},{c:"Portugal",f:"🇵🇹"},{c:"Qatar",f:"🇶🇦"},
+  {c:"Romania",f:"🇷🇴"},{c:"Saudi Arabia",f:"🇸🇦"},{c:"Scotland",f:"🏴󠁧󠁢󠁳󠁣󠁴󠁿"},
+  {c:"Senegal",f:"🇸🇳"},{c:"Serbia",f:"🇷🇸"},{c:"Slovenia",f:"🇸🇮"},
+  {c:"South Africa",f:"🇿🇦"},{c:"South Korea",f:"🇰🇷"},{c:"Spain",f:"🇪🇸"},
+  {c:"Sweden",f:"🇸🇪"},{c:"Switzerland",f:"🇨🇭"},{c:"Turkiye",f:"🇹🇷"},
+  {c:"Ukraine",f:"🇺🇦"},{c:"Uruguay",f:"🇺🇾"},{c:"USA",f:"🇺🇸"},
+  {c:"Venezuela",f:"🇻🇪"},{c:"Wales",f:"🏴󠁧󠁢󠁷󠁬󠁳󠁿"},
+];
+
+// ── Team Strength (FIFA ranking-based, Jun 2026 est.) ──
+const TEAM_STRENGTH = {
+  "France":89,"Brazil":89,"England":88,"Argentina":88,"Spain":87,
+  "Portugal":86,"Netherlands":85,"Germany":84,"Belgium":81,"Colombia":80,
+  "Switzerland":79,"Croatia":78,"Serbia":75,"Morocco":74,"USA":74,
+  "Norway":74,"Czechia":73,"South Korea":72,"Japan":71,"Mexico":73,
+  "Australia":68,"Turkiye":69,"Canada":70,"Algeria":66,"Senegal":70,
+  "Egypt":65,"Cape Verde":62,"Paraguay":65,"Bosnia-Herz":67,
+  "Curacao":55,"South Africa":64,"DR Congo":63,"Uruguay":80,
+  "Chile":72,"Ecuador":68,"Poland":73,"Denmark":78,"Sweden":76,
+  "Italy":83,"Greece":68,"Hungary":69,"Romania":67,"Austria":74,
+  "Scotland":71,"Wales":70,"Nigeria":70,"Ghana":67,"Cameroon":66,
+  "Saudi Arabia":65,"Iran":64,"Qatar":62,"New Zealand":60,
+};
 </script>
 
 <!-- HERO -->
@@ -258,6 +347,7 @@ const MATCHES_TO_SEED = [
       </svg>
     </div>
     <div class="hero-content">
+      <div class="hero-logo"><img src="/logo.png" alt="GoalOracle" onerror="this.style.display='none'"/></div>
       <div class="hero-badge"><span class="live-dot"></span> X LAYER MAINNET · LIVE</div>
       <h1>GOAL<span>ORACLE</span></h1>
       <p class="hero-sub">AI-powered · On-chain · World Cup 2026</p>
@@ -319,6 +409,10 @@ const MATCHES_TO_SEED = [
 <div id="page-oracle" class="page">
   <p class="section-label">Ask the AI oracle</p>
   <div class="oracle-card">
+    <button class="oracle-settings-btn" onclick="openApiKeyModal()">⚙ API Key</button>
+    <div id="oracle-nokey-notice" class="oracle-notice" style="display:none;">
+      <div class="apikey-notice">⚠ &nbsp;Oracle needs an Anthropic API key to function. <a href="#" onclick="openApiKeyModal();return false;">Click ⚙ API Key above</a> to configure it — it's stored only in your browser.</div>
+    </div>
     <div class="oracle-msgs" id="oracle-msgs">
       <div class="msg ai">Welcome to GoalOracle. I analyse team form, head-to-head records, injury data, and on-chain betting flows to give you an edge on the 2026 World Cup. Ask me anything.</div>
     </div>
@@ -360,20 +454,28 @@ const MATCHES_TO_SEED = [
   <div class="seed-card">
     <div class="seed-title">➕ ADD A SINGLE MATCH</div>
     <div class="seed-desc">Add one specific match without re-seeding everything. Enter the team names, emoji flags, and kickoff time.</div>
-    <div style="display:grid;grid-template-columns:1fr 40px 1fr;gap:8px;margin-bottom:8px;align-items:center;">
-      <div style="display:flex;gap:6px;">
-        <input id="add-hflag" placeholder="🏳️" type="text" maxlength="8" style="width:52px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:3px;font-size:20px;text-align:center;outline:none;"/>
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;margin-bottom:8px;align-items:center;">
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button type="button" class="flag-picker-btn" id="btn-hflag" onclick="openFlagPicker('hflag')">
+          <span class="fp-flag" id="fp-hflag-icon">🏳️</span>
+          <span class="fp-name" id="fp-hflag-name">Flag</span>
+        </button>
+        <input id="add-hflag" type="hidden" value="🏳️"/>
         <input id="add-home" placeholder="Home team" style="flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:3px;font-family:var(--font-mono);font-size:13px;outline:none;"/>
       </div>
-      <div style="text-align:center;font-family:var(--font-display);color:var(--muted);">VS</div>
-      <div style="display:flex;gap:6px;">
+      <div style="text-align:center;font-family:var(--font-display);color:var(--muted);font-size:14px;">VS</div>
+      <div style="display:flex;gap:6px;align-items:center;">
         <input id="add-away" placeholder="Away team" style="flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:3px;font-family:var(--font-mono);font-size:13px;outline:none;"/>
-        <input id="add-aflag" placeholder="🏳️" type="text" maxlength="8" style="width:52px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:3px;font-size:20px;text-align:center;outline:none;"/>
+        <button type="button" class="flag-picker-btn" id="btn-aflag" onclick="openFlagPicker('aflag')">
+          <span class="fp-flag" id="fp-aflag-icon">🏳️</span>
+          <span class="fp-name" id="fp-aflag-name">Flag</span>
+        </button>
+        <input id="add-aflag" type="hidden" value="🏳️"/>
       </div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
       <label style="font-size:12px;color:var(--muted);font-family:var(--font-mono);">Kickoff (UTC):</label>
-      <input id="add-kickoff" type="datetime-local" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:3px;font-family:var(--font-mono);font-size:13px;outline:none;color-scheme:dark;"/>
+      <input id="add-kickoff" type="datetime-local" min="2026-06-01T00:00"/>
     </div>
     <button class="seed-btn" onclick="addSingleMatch()" style="background:var(--green);color:#000;">➕ Add Match</button>
     <div class="seed-log" id="add-log" style="display:none;"></div>
@@ -395,6 +497,33 @@ const MATCHES_TO_SEED = [
     <div class="seed-log" id="resolve-log" style="display:none;"></div>
   </div>
 </div>
+</div>
+
+<!-- FLAG PICKER MODAL -->
+<div class="flag-modal-overlay" id="flag-modal-overlay" onclick="if(event.target===this)closeFlagPicker()">
+  <div class="flag-modal-box">
+    <div class="flag-modal-head">
+      <input type="text" id="flag-search" placeholder="Search country..." oninput="filterFlags(this.value)" autocomplete="off"/>
+      <button class="flag-modal-close" onclick="closeFlagPicker()">✕ Close</button>
+    </div>
+    <div class="flag-grid" id="flag-grid"></div>
+  </div>
+</div>
+
+<!-- API KEY MODAL -->
+<div class="apikey-overlay" id="apikey-overlay" onclick="if(event.target===this)closeApiKeyModal()">
+  <div class="apikey-box">
+    <div class="apikey-title">🔑 ORACLE API KEY</div>
+    <div class="apikey-desc">
+      Enter your <a href="https://console.anthropic.com/settings/keys" target="_blank">Anthropic API key</a> to power the AI Oracle. It's stored <strong>only in your browser</strong> and never sent anywhere except directly to Anthropic's API.<br><br>
+      For a production deployment, use a <strong>Vercel serverless function</strong> instead — set <code style="color:var(--green)">ANTHROPIC_API_KEY</code> as an environment variable.
+    </div>
+    <input class="apikey-input" id="apikey-input" type="password" placeholder="sk-ant-api03-..." autocomplete="off"/>
+    <div class="apikey-row">
+      <button class="apikey-cancel" onclick="closeApiKeyModal()">Cancel</button>
+      <button class="apikey-save" onclick="saveApiKey()">Save & Activate ↗</button>
+    </div>
+  </div>
 </div>
 
 <!-- TOAST -->
@@ -557,6 +686,9 @@ function buildMatchCard(m, displayNum) {
   };
   const insight = insights[m.homeTeam] || "AI analysis loading — oracle is syncing with on-chain betting data for this match.";
 
+  // Compute live odds from pool data (or default team-strength odds)
+  const odds = computeOdds(m);
+
   // Admin delete button (shown only when admin panel is visible)
   const isAdmin = document.getElementById("admin-tab") && document.getElementById("admin-tab").style.display !== "none";
   const deleteBtn = isAdmin
@@ -583,17 +715,17 @@ function buildMatchCard(m, displayNum) {
     <div class="odds-grid">
       <div class="odds-btn" id="odds-${id}-1" onclick="selectOdds('${id}',1,this)">
         <div class="odds-label">Home Win</div>
-        <div class="odds-num">1.85</div>
+        <div class="odds-num">${odds.home}</div>
         <div class="odds-pool">${homePool} OKB</div>
       </div>
       <div class="odds-btn" id="odds-${id}-2" onclick="selectOdds('${id}',2,this)">
         <div class="odds-label">Draw</div>
-        <div class="odds-num">3.20</div>
+        <div class="odds-num">${odds.draw}</div>
         <div class="odds-pool">${drawPool} OKB</div>
       </div>
       <div class="odds-btn" id="odds-${id}-3" onclick="selectOdds('${id}',3,this)">
         <div class="odds-label">Away Win</div>
-        <div class="odds-num">2.75</div>
+        <div class="odds-num">${odds.away}</div>
         <div class="odds-pool">${awayPool} OKB</div>
       </div>
     </div>
@@ -711,6 +843,12 @@ async function askChip(el, q) {
 }
 
 async function callOracle(question) {
+  const apiKey = localStorage.getItem("oracle_api_key") || "";
+  if (!apiKey) {
+    openApiKeyModal();
+    return;
+  }
+
   const msgs = document.getElementById("oracle-msgs");
   const userMsg = document.createElement("div");
   userMsg.className = "msg user";
@@ -728,27 +866,132 @@ async function callOracle(question) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-api-key": apiKey,
         "anthropic-version": "2023-06-01",
         "anthropic-dangerous-direct-browser-access": "true"
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
+        max_tokens: 600,
         system: `You are GoalOracle, an AI analyst for the 2026 FIFA World Cup prediction market deployed on X Layer blockchain (OKX's ZK-EVM L2). 
 Contract address: 0x6f2fad74009Ed11A764d6fd3871E52C585861E92
-You give sharp, confident 2-3 sentence match predictions and betting insights. Mention on-chain data, X Layer, or OKB where relevant. Be specific about teams, stats, and value opportunities. Never be vague.`,
+You give sharp, confident 2-3 sentence match predictions and betting insights. Mention on-chain data, X Layer, or OKB where relevant. Be specific about teams, stats, and value opportunities. Never be vague. Keep responses concise and punchy.`,
         messages: [{ role: "user", content: question }]
       })
     });
     const data = await res.json();
-    const answer = data.content?.find(b => b.type === "text")?.text || "Oracle is processing — try again.";
-    loadMsg.className = "msg ai";
-    loadMsg.textContent = answer;
+    if (data.error) {
+      loadMsg.className = "msg ai";
+      if (data.error.type === "authentication_error") {
+        loadMsg.textContent = "❌ Invalid API key. Click ⚙ API Key above to update it.";
+      } else {
+        loadMsg.textContent = `❌ API error: ${data.error.message}`;
+      }
+    } else {
+      const answer = data.content?.find(b => b.type === "text")?.text || "No response — please try again.";
+      loadMsg.className = "msg ai";
+      loadMsg.textContent = answer;
+    }
   } catch(e) {
     loadMsg.className = "msg ai";
-    loadMsg.textContent = "Oracle is syncing with live match data. Please try again in a moment.";
+    loadMsg.textContent = "Network error reaching Oracle. Check your connection and try again.";
   }
   msgs.scrollTop = msgs.scrollHeight;
+}
+
+// ── API Key modal ─────────────────────────────
+function openApiKeyModal() {
+  const overlay = document.getElementById("apikey-overlay");
+  const input = document.getElementById("apikey-input");
+  const existing = localStorage.getItem("oracle_api_key") || "";
+  input.value = existing;
+  overlay.classList.add("open");
+  setTimeout(() => input.focus(), 80);
+}
+
+function closeApiKeyModal() {
+  document.getElementById("apikey-overlay").classList.remove("open");
+}
+
+function saveApiKey() {
+  const val = document.getElementById("apikey-input").value.trim();
+  if (!val) { showToast("Enter a key first", true); return; }
+  localStorage.setItem("oracle_api_key", val);
+  closeApiKeyModal();
+  document.getElementById("oracle-nokey-notice").style.display = "none";
+  showToast("✓ Oracle key saved — ask away!");
+}
+
+// ── Flag Picker ────────────────────────────────
+let _flagTarget = null; // 'hflag' or 'aflag'
+
+function buildFlagGrid(filter) {
+  const grid = document.getElementById("flag-grid");
+  const lf = (filter || "").toLowerCase();
+  const items = FLAG_CATALOGUE.filter(x => !lf || x.c.toLowerCase().includes(lf));
+  const current = _flagTarget ? document.getElementById("add-"+_flagTarget).value : "";
+  grid.innerHTML = items.map(x => `
+    <div class="flag-item ${x.f===current?'active':''}" onclick="selectFlag('${x.f.replace(/'/g,"\\'")}','${x.c.replace(/'/g,"\\'")}')">
+      <span class="fi-flag">${x.f}</span>
+      <span class="fi-name">${x.c}</span>
+    </div>`).join("");
+}
+
+function openFlagPicker(target) {
+  _flagTarget = target;
+  document.getElementById("flag-search").value = "";
+  buildFlagGrid("");
+  document.getElementById("flag-modal-overlay").classList.add("open");
+  setTimeout(() => document.getElementById("flag-search").focus(), 80);
+}
+
+function closeFlagPicker() {
+  document.getElementById("flag-modal-overlay").classList.remove("open");
+  _flagTarget = null;
+}
+
+function filterFlags(val) {
+  buildFlagGrid(val);
+}
+
+function selectFlag(flag, name) {
+  if (!_flagTarget) return;
+  document.getElementById("add-"+_flagTarget).value = flag;
+  document.getElementById("fp-"+_flagTarget+"-icon").textContent = flag;
+  document.getElementById("fp-"+_flagTarget+"-name").textContent = name;
+  closeFlagPicker();
+}
+
+// ── Odds helpers ──────────────────────────────
+function getDefaultOdds(homeTeam, awayTeam) {
+  const hs = TEAM_STRENGTH[homeTeam] || 70;
+  const as = TEAM_STRENGTH[awayTeam] || 70;
+  const total = hs + as;
+  const K = hs / total;
+  const drawBase = 0.26;
+  const hp = (1 - drawBase) * K;
+  const ap = (1 - drawBase) * (1 - K);
+  const dp = drawBase;
+  const margin = 1.09; // 9% bookmaker overround
+  return {
+    home: Math.max(1.01, 1 / (hp * margin)).toFixed(2),
+    draw: Math.max(1.01, 1 / (dp * margin)).toFixed(2),
+    away: Math.max(1.01, 1 / (ap * margin)).toFixed(2),
+  };
+}
+
+function computeOdds(m) {
+  const totalPool = parseFloat(ethers.formatEther(m.totalPool));
+  const homePool  = parseFloat(ethers.formatEther(m.totalHome));
+  const drawPool  = parseFloat(ethers.formatEther(m.totalDraw));
+  const awayPool  = parseFloat(ethers.formatEther(m.totalAway));
+  if (totalPool < 0.000001) return getDefaultOdds(m.homeTeam, m.awayTeam);
+  const fee = 0.95;
+  return {
+    home: homePool > 0.000001 ? Math.max(1.01, totalPool * fee / homePool).toFixed(2) : "—",
+    draw: drawPool > 0.000001 ? Math.max(1.01, totalPool * fee / drawPool).toFixed(2) : "—",
+    away: awayPool > 0.000001 ? Math.max(1.01, totalPool * fee / awayPool).toFixed(2) : "—",
+  };
 }
 
 // ── Admin: Delete single match ────────────────
@@ -953,6 +1196,13 @@ function showToast(msg, isError=false) {
 // ── Init ──────────────────────────────────────
 loadStats();
 loadMatches();
+// Show API key notice on Oracle tab if no key configured
+(function initOracleNotice() {
+  if (!localStorage.getItem("oracle_api_key")) {
+    const el = document.getElementById("oracle-nokey-notice");
+    if (el) el.style.display = "block";
+  }
+})();
 </script>
 </body>
 </html>
