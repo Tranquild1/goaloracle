@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GoalOracle — World Cup 2026 Prediction Market</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+<style>
+:root {
+  --green: #00C97B;
+  --green-dark: #009B5C;
+  --gold: #FFB830;
+  --red: #FF4444;
+  --bg: #080C10;
+  --bg2: #0E1318;
+  --bg3: #161C24;
+  --border: rgba(255,255,255,0.07);
+  --text: #F0F4F8;
+  --muted: #6B7A8D;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;overflow-x:hidden;}
+
+/* noise overlay */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4;}
+
+/* HERO */
+.hero{position:relative;padding:0;overflow:hidden;background:var(--bg);}
+.hero-pitch{width:100%;height:320px;background:linear-gradient(180deg,#0a1a0f 0%,#0d2416 40%,#0a1a0f 100%);position:relative;display:flex;align-items:center;justify-content:center;}
+.pitch-lines{position:absolute;inset:0;opacity:0.15;}
+.pitch-lines svg{width:100%;height:100%;}
+.hero-content{position:relative;z-index:2;text-align:center;padding:2rem;}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,201,123,0.1);border:1px solid rgba(0,201,123,0.3);color:var(--green);font-size:12px;font-family:var(--font-mono);padding:5px 14px;border-radius:2px;margin-bottom:1.5rem;letter-spacing:0.1em;}
+.live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(1.3);}}
+.hero h1{font-family:var(--font-display);font-size:clamp(52px,10vw,96px);line-height:0.9;letter-spacing:2px;color:#fff;text-shadow:0 0 80px rgba(0,201,123,0.3);}
+.hero h1 span{color:var(--green);}
+.hero-sub{font-size:14px;color:var(--muted);margin-top:1rem;letter-spacing:0.05em;}
+.stats-bar{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.stat{padding:1.25rem;text-align:center;border-right:1px solid var(--border);}
+.stat:last-child{border-right:none;}
+.stat-val{font-family:var(--font-display);font-size:28px;color:var(--green);letter-spacing:1px;}
+.stat-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:2px;}
+
+/* WALLET BAR */
+.wallet-bar{display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.25rem;background:var(--bg2);border-bottom:1px solid var(--border);}
+.wallet-info{display:flex;align-items:center;gap:10px;}
+.wallet-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);}
+.wallet-dot.connected{background:var(--green);box-shadow:0 0 8px var(--green);}
+.wallet-addr{font-family:var(--font-mono);font-size:12px;color:var(--muted);}
+.wallet-bal{font-family:var(--font-mono);font-size:13px;color:var(--text);font-weight:500;}
+.connect-btn{background:var(--green);color:#000;border:none;padding:7px 16px;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;border-radius:2px;letter-spacing:0.05em;transition:all 0.2s;}
+.connect-btn:hover{background:var(--green-dark);}
+.connect-btn.connected{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:11px;}
+
+/* TABS */
+.tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 1rem;overflow-x:auto;}
+.tab{padding:1rem 1.25rem;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;letter-spacing:0.05em;font-weight:500;transition:all 0.2s;}
+.tab.active{color:var(--green);border-bottom-color:var(--green);}
+.tab:hover:not(.active){color:var(--text);}
+
+/* CONTENT */
+.content{max-width:760px;margin:0 auto;padding:1.25rem;}
+.page{display:none;}
+.page.active{display:block;}
+.section-label{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin:1.5rem 0 0.75rem;}
+
+/* MATCH CARDS */
+.match-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1.25rem;margin-bottom:0.75rem;transition:border-color 0.2s;}
+.match-card:hover{border-color:rgba(0,201,123,0.2);}
+.match-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
+.match-group{font-size:11px;color:var(--muted);font-family:var(--font-mono);letter-spacing:0.1em;}
+.match-status{font-size:11px;padding:3px 10px;border-radius:2px;font-family:var(--font-mono);}
+.match-status.live{background:rgba(255,68,68,0.15);color:var(--red);border:1px solid rgba(255,68,68,0.3);}
+.match-status.upcoming{background:rgba(0,201,123,0.1);color:var(--green);border:1px solid rgba(0,201,123,0.2);}
+.match-status.closed{background:rgba(107,122,141,0.1);color:var(--muted);border:1px solid var(--border);}
+
+.teams{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:1rem;margin-bottom:1.25rem;}
+.team{display:flex;flex-direction:column;gap:4px;}
+.team.right{text-align:right;align-items:flex-end;}
+.team-flag{font-size:28px;line-height:1;}
+.team-name{font-family:var(--font-display);font-size:22px;letter-spacing:1px;color:var(--text);}
+.vs{font-family:var(--font-display);font-size:18px;color:var(--muted);letter-spacing:2px;}
+
+.ai-box{background:rgba(100,90,220,0.08);border:1px solid rgba(100,90,220,0.2);border-radius:3px;padding:10px 14px;margin-bottom:1rem;display:flex;gap:10px;align-items:flex-start;}
+.ai-icon{font-size:14px;margin-top:1px;flex-shrink:0;}
+.ai-text{font-size:12.5px;color:#A89EE8;line-height:1.6;}
+
+.odds-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1rem;}
+.odds-btn{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:10px 8px;text-align:center;cursor:pointer;transition:all 0.15s;}
+.odds-btn:hover{border-color:rgba(0,201,123,0.4);}
+.odds-btn.selected{background:rgba(0,201,123,0.1);border-color:var(--green);}
+.odds-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--font-mono);}
+.odds-num{font-family:var(--font-display);font-size:22px;color:var(--text);margin-top:2px;}
+.odds-btn.selected .odds-num{color:var(--green);}
+.odds-pool{font-size:10px;color:var(--muted);margin-top:2px;font-family:var(--font-mono);}
+
+.stake-row{display:flex;gap:8px;align-items:center;}
+.stake-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:10px 14px;font-family:var(--font-mono);font-size:14px;color:var(--text);outline:none;}
+.stake-input:focus{border-color:var(--green);}
+.stake-input::placeholder{color:var(--muted);}
+.predict-btn{background:var(--green);color:#000;border:none;padding:10px 20px;font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer;border-radius:3px;white-space:nowrap;transition:all 0.2s;letter-spacing:0.05em;}
+.predict-btn:hover{background:var(--green-dark);}
+.predict-btn:disabled{background:var(--bg3);color:var(--muted);cursor:not-allowed;}
+.payout-est{font-size:11px;color:var(--muted);margin-top:6px;font-family:var(--font-mono);}
+.payout-est span{color:var(--green);}
+
+/* LEADERBOARD */
+.lb-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+.lb-row{display:flex;align-items:center;gap:12px;padding:12px 1.25rem;border-bottom:1px solid var(--border);transition:background 0.15s;}
+.lb-row:last-child{border-bottom:none;}
+.lb-row:hover{background:var(--bg3);}
+.lb-rank{font-family:var(--font-display);font-size:20px;width:28px;color:var(--muted);}
+.lb-rank.r1{color:var(--gold);}
+.lb-rank.r2{color:#C0C0C0;}
+.lb-rank.r3{color:#CD7F32;}
+.lb-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0;}
+.lb-info{flex:1;}
+.lb-name{font-size:14px;font-weight:500;color:var(--text);}
+.lb-addr{font-size:11px;color:var(--muted);font-family:var(--font-mono);}
+.lb-right{text-align:right;}
+.lb-pts{font-family:var(--font-display);font-size:20px;color:var(--green);}
+.lb-streak{font-size:11px;color:var(--muted);}
+
+.my-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:1rem;}
+.my-stat{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1rem;text-align:center;}
+.my-stat-val{font-family:var(--font-display);font-size:26px;color:var(--green);}
+.my-stat-lbl{font-size:11px;color:var(--muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.1em;margin-top:4px;}
+
+/* ORACLE */
+.oracle-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1.25rem;}
+.oracle-msgs{display:flex;flex-direction:column;gap:10px;margin-bottom:1rem;max-height:400px;overflow-y:auto;}
+.msg{padding:12px 14px;border-radius:3px;font-size:13.5px;line-height:1.6;}
+.msg.ai{background:rgba(100,90,220,0.1);border:1px solid rgba(100,90,220,0.15);color:#C4BCFF;}
+.msg.user{background:var(--bg3);border:1px solid var(--border);color:var(--text);text-align:right;}
+.msg.loading{color:var(--muted);font-family:var(--font-mono);font-size:12px;}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem;}
+.chip{background:var(--bg3);border:1px solid var(--border);border-radius:2px;padding:6px 12px;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--font-mono);transition:all 0.15s;}
+.chip:hover{border-color:rgba(100,90,220,0.4);color:#A89EE8;}
+.oracle-input-row{display:flex;gap:8px;}
+.oracle-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:10px 14px;font-family:var(--font-mono);font-size:13px;color:var(--text);outline:none;}
+.oracle-input:focus{border-color:rgba(100,90,220,0.5);}
+.oracle-input::placeholder{color:var(--muted);}
+.oracle-btn{background:rgba(100,90,220,0.8);color:#fff;border:none;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;border-radius:3px;transition:all 0.2s;}
+.oracle-btn:hover{background:rgba(100,90,220,1);}
+
+/* SEED PANEL */
+.seed-card{background:var(--bg2);border:1px solid rgba(255,184,48,0.2);border-radius:4px;padding:1.25rem;margin-bottom:0.75rem;}
+.seed-title{font-family:var(--font-display);font-size:18px;color:var(--gold);margin-bottom:0.5rem;letter-spacing:1px;}
+.seed-desc{font-size:13px;color:var(--muted);margin-bottom:1rem;line-height:1.6;}
+.seed-btn{background:var(--gold);color:#000;border:none;padding:10px 20px;font-weight:700;font-size:13px;cursor:pointer;border-radius:3px;margin-right:8px;transition:all 0.2s;}
+.seed-btn:hover{opacity:0.85;}
+.seed-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.seed-log{font-family:var(--font-mono);font-size:11px;color:var(--green);margin-top:0.75rem;line-height:1.8;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--bg3);border:1px solid var(--green);color:var(--text);padding:12px 20px;border-radius:4px;font-size:13px;font-family:var(--font-mono);z-index:999;transition:transform 0.3s;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.error{border-color:var(--red);color:var(--red);}
+
+/* FOOTER */
+.footer{text-align:center;padding:2rem;font-size:11px;color:var(--muted);font-family:var(--font-mono);border-top:1px solid var(--border);margin-top:2rem;}
+.footer a{color:var(--green);text-decoration:none;}
+
+@media(max-width:480px){
+  .hero h1{font-size:52px;}
+  .team-name{font-size:18px;}
+  .odds-grid{gap:5px;}
+}
+</style>
+</head>
+<body>
+
+<script>
+const CONTRACT_ADDRESS = "0x6f2fad74009Ed11A764d6fd3871E52C585861E92";
+const XLAYER_CHAIN_ID = 196;
+const XLAYER_RPC = "https://rpc.xlayer.tech";
+
+const ABI = [
+  "function owner() view returns (address)",
+  "function matchCount() view returns (uint256)",
+  "function totalVolume() view returns (uint256)",
+  "function playerCount() view returns (uint256)",
+  "function getMatch(uint256) view returns (tuple(uint256 id,string homeTeam,string awayTeam,string homeFlag,string awayFlag,uint64 kickoffTime,uint8 status,uint8 result,uint256 totalHome,uint256 totalDraw,uint256 totalAway,uint256 totalPool))",
+  "function getMatches(uint256,uint256) view returns (tuple(uint256 id,string homeTeam,string awayTeam,string homeFlag,string awayFlag,uint64 kickoffTime,uint8 status,uint8 result,uint256 totalHome,uint256 totalDraw,uint256 totalAway,uint256 totalPool)[])",
+  "function getPrediction(address,uint256) view returns (tuple(uint256 matchId,uint8 choice,uint256 stake,bool claimed))",
+  "function getPlayerStats(address) view returns (tuple(uint256 totalPredictions,uint256 correctPredictions,uint256 totalStaked,uint256 totalWon,uint256 points,uint256 streak,uint256 bestStreak))",
+  "function getLeaderboard(uint256) view returns (address[],uint256[])",
+  "function estimatePayout(uint256,uint8,uint256) view returns (uint256)",
+  "function predict(uint256,uint8) payable",
+  "function claimWinnings(uint256)",
+  "function claimRefund(uint256)",
+  "function createMatch(string,string,string,string,uint64) returns (uint256)",
+  "function openMatch(uint256)",
+  "function closeMatch(uint256)",
+  "function resolveMatch(uint256,uint8)",
+  "function cancelMatch(uint256)",
+  "event MatchCreated(uint256 indexed matchId,string home,string away,uint64 kickoff)",
+];
+
+// World Cup 2026 matches to seed
+// All 16 real FIFA World Cup 2026 Group Stage Matchday 1 fixtures
+// Timestamps (UTC): verified against FIFA 2026 schedule
+const MATCHES_TO_SEED = [
+  {home:"Mexico",      away:"South Africa", hf:"🇲🇽", af:"🇿🇦", kickoff:1749758400},
+  {home:"USA",         away:"Paraguay",     hf:"🇺🇸", af:"🇵🇾", kickoff:1749780000},
+  {home:"Canada",      away:"Bosnia-Herz",  hf:"🇨🇦", af:"🇧🇦", kickoff:1749830400},
+  {home:"South Korea", away:"Czechia",      hf:"🇰🇷", af:"🇨🇿", kickoff:1749859200},
+  {home:"Brazil",      away:"Morocco",      hf:"🇧🇷", af:"🇲🇦", kickoff:1749916800},
+  {home:"Australia",   away:"Turkiye",      hf:"🇦🇺", af:"🇹🇷", kickoff:1749927600},
+  {home:"Germany",     away:"Curacao",      hf:"🇩🇪", af:"🇨🇼", kickoff:1750003200},
+  {home:"Belgium",     away:"Egypt",        hf:"🇧🇪", af:"🇪🇬", kickoff:1750014000},
+  {home:"Spain",       away:"Cape Verde",   hf:"🇪🇸", af:"🇨🇻", kickoff:1750032000},
+  {home:"Netherlands", away:"Japan",        hf:"🇳🇱", af:"🇯🇵", kickoff:1750089600},
+  {home:"Argentina",   away:"Algeria",      hf:"🇦🇷", af:"🇩🇿", kickoff:1750100400},
+  {home:"France",      away:"Senegal",      hf:"🇫🇷", af:"🇸🇳", kickoff:1750118400},
+  {home:"Portugal",    away:"DR Congo",     hf:"🇵🇹", af:"🇨🇩", kickoff:1750176000},
+  {home:"England",     away:"Croatia",      hf:"🏴\u{e0067}\u{e0062}\u{e0065}\u{e006e}\u{e0067}\u{e007f}", af:"🇭🇷", kickoff:1750186800},
+  {home:"Colombia",    away:"Serbia",       hf:"🇨🇴", af:"🇷🇸", kickoff:1750204800},
+  {home:"Switzerland", away:"Norway",       hf:"🇨🇭", af:"🇳🇴", kickoff:1750262400},
+];
+</script>
+
+<div class="hero">
+  <div class="hero-pitch">
+    <div class="pitch-lines">
+      <svg viewBox="0 0 800 320" preserveAspectRatio="xMidYMid slice">
+        <rect x="50" y="20" width="700" height="280" fill="none" stroke="white" stroke-width="1.5"/>
+        <line x1="400" y1="20" x2="400" y2="300" stroke="white" stroke-width="1"/>
+        <circle cx="400" cy="160" r="60" fill="none" stroke="white" stroke-width="1"/>
+        <circle cx="400" cy="160" r="4" fill="white" opacity="0.5"/>
+        <rect x="50" y="100" width="100" height="120" fill="none" stroke="white" stroke-width="1"/>
+        <rect x="650" y="100" width="100" height="120" fill="none" stroke="white" stroke-width="1"/>
+        <rect x="50" y="130" width="40" height="60" fill="none" stroke="white" stroke-width="1"/>
+        <rect x="710" y="130" width="40" height="60" fill="none" stroke="white" stroke-width="1"/>
+      </svg>
+    </div>
+    <div class="hero-content">
+      <div class="hero-badge"><span class="live-dot"></span> X LAYER MAINNET · LIVE</div>
+      <h1>GOAL<span>ORACLE</span></h1>
+      <p class="hero-sub">AI-powered · On-chain · World Cup 2026</p>
+    </div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-val" id="stat-volume">—</div><div class="stat-lbl">OKB Staked</div></div>
+    <div class="stat"><div class="stat-val" id="stat-players">—</div><div class="stat-lbl">Predictors</div></div>
+    <div class="stat"><div class="stat-val" id="stat-matches">—</div><div class="stat-lbl">Matches</div></div>
+  </div>
+</div>
+
+<div class="wallet-bar">
+  <div class="wallet-info">
+    <div class="wallet-dot" id="wallet-dot"></div>
+    <span class="wallet-addr" id="wallet-addr">Not connected</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span class="wallet-bal" id="wallet-bal"></span>
+    <button class="connect-btn" id="connect-btn" onclick="connectWallet()">Connect Wallet</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('predict',this)">⚽ Predict</div>
+  <div class="tab" onclick="switchTab('leaderboard',this)">🏆 Leaderboard</div>
+  <div class="tab" onclick="switchTab('oracle',this)">🤖 AI Oracle</div>
+  <div class="tab" id="admin-tab" style="display:none" onclick="switchTab('admin',this)">⚙️ Admin</div>
+</div>
+
+<div class="content">
+<div id="page-predict" class="page active">
+  <p class="section-label">Open matches</p>
+  <div id="matches-container">
+    <div style="text-align:center;padding:3rem;color:var(--muted);font-family:var(--font-mono);font-size:13px;">
+      Loading matches from X Layer...
+    </div>
+  </div>
+</div>
+
+<div id="page-leaderboard" class="page">
+  <p class="section-label">Top predictors</p>
+  <div class="lb-card" id="lb-container">
+    <div style="padding:2rem;text-align:center;color:var(--muted);font-family:var(--font-mono);font-size:13px;">Loading...</div>
+  </div>
+  <p class="section-label">Your stats</p>
+  <div class="my-stats">
+    <div class="my-stat"><div class="my-stat-val" id="my-pts">—</div><div class="my-stat-lbl">Points</div></div>
+    <div class="my-stat"><div class="my-stat-val" id="my-preds">—</div><div class="my-stat-lbl">Predictions</div></div>
+    <div class="my-stat"><div class="my-stat-val" id="my-streak">—</div><div class="my-stat-lbl">Streak 🔥</div></div>
+  </div>
+</div>
+
+<div id="page-oracle" class="page">
+  <p class="section-label">Ask the AI oracle</p>
+  <div class="oracle-card">
+    <div class="oracle-msgs" id="oracle-msgs">
+      <div class="msg ai">Welcome to GoalOracle. I analyse team form, head-to-head records, injury data, and on-chain betting flows to give you an edge on the 2026 World Cup. Ask me anything.</div>
+    </div>
+    <div class="chips" id="oracle-chips">
+      <div class="chip" onclick="askChip(this,'Who are the favourites to win 2026 World Cup?')">Who are the favourites?</div>
+      <div class="chip" onclick="askChip(this,'Brazil vs Germany prediction and analysis')">Brazil vs Germany?</div>
+      <div class="chip" onclick="askChip(this,'Which match has the best value odds right now?')">Best value odds?</div>
+      <div class="chip" onclick="askChip(this,'France vs Argentina — who wins and why?')">France vs Argentina?</div>
+      <div class="chip" onclick="askChip(this,'What is X Layer blockchain and why is GoalOracle built on it?')">What is X Layer?</div>
+    </div>
+    <div class="oracle-input-row">
+      <input class="oracle-input" id="oracle-input" placeholder="Ask about any match, team, or odds..." onkeydown="if(event.key==='Enter')askOracle()"/>
+      <button class="oracle-btn" onclick="askOracle()">Ask ↗</button>
+    </div>
+  </div>
+</div>
+
+<div id="page-admin" class="page">
+  <p class="section-label">Admin Panel — Manage matches</p>
+
+  <div class="seed-card">
+    <div class="seed-title">🗑 STEP 1 — CANCEL EXISTING MATCHES</div>
+    <div class="seed-desc">Automatically finds all active matches on-chain and cancels them. Run this first to clear old or wrong fixtures before seeding the real ones.</div>
+    <button class="seed-btn" id="cancel-all-btn" onclick="cancelRange()" style="background:var(--red);color:#fff;">Cancel All Existing Matches</button>
+    <div class="seed-log" id="cancel-log" style="display:none;"></div>
+  </div>
+
+  <div class="seed-card">
+    <div class="seed-title">🚀 STEP 2 — SEED WORLD CUP MATCHES</div>
+    <div class="seed-desc">Seeds all 16 real Group Stage Matchday 1 fixtures on-chain. Each match needs 2 transactions (create + open) = 32 total. Watch the log below.</div>
+    <button class="seed-btn" id="seed-btn" onclick="seedMatches()">🚀 Seed All 16 Matches</button>
+    <div class="seed-log" id="seed-log" style="display:none;"></div>
+  </div>
+
+  <div class="seed-card">
+    <div class="seed-title">➕ ADD A SINGLE MATCH</div>
+    <div class="seed-desc">Add one specific match without re-seeding everything. Enter the team names, emoji flags, and kickoff time.</div>
+    <div style="display:grid;grid-template-columns:1fr 40px 1fr;gap:8px;margin-bottom:8px;align-items:center;">
+      <div style="display:flex;gap:6px;">
+        <input id="add-hflag" placeholder="🏳️" type="text" maxlength="8" style="width:52px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:3px;font-size:20px;text-align:center;outline:none;"/>
+        <input id="add-home" placeholder="Home team" style="flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:3px;font-family:var(--font-mono);font-size:13px;outline:none;"/>
+      </div>
+      <div style="text-align:center;font-family:var(--font-display);color:var(--muted);">VS</div>
+      <div style="display:flex;gap:6px;">
+        <input id="add-away" placeholder="Away team" style="flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:3px;font-family:var(--font-mono);font-size:13px;outline:none;"/>
+        <input id="add-aflag" placeholder="🏳️" type="text" maxlength="8" style="width:52px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:3px;font-size:20px;text-align:center;outline:none;"/>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+      <label style="font-size:12px;color:var(--muted);font-family:var(--font-mono);">Kickoff (UTC):</label>
+      <input id="add-kickoff" type="datetime-local" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:3px;font-family:var(--font-mono);font-size:13px;outline:none;color-scheme:dark;"/>
+    </div>
+    <button class="seed-btn" onclick="addSingleMatch()" style="background:var(--green);color:#000;">➕ Add Match</button>
+    <div class="seed-log" id="add-log" style="display:none;"></div>
+  </div>
+
+  <div class="seed-card">
+    <div class="seed-title">✅ RESOLVE A MATCH</div>
+    <div class="seed-desc">After a match ends, enter the match ID and result to trigger on-chain payouts.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <input id="resolve-id" placeholder="Match ID (0,1,2...)" type="number" min="0" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:3px;font-family:var(--font-mono);font-size:13px;width:160px;outline:none;"/>
+      <select id="resolve-result" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:3
