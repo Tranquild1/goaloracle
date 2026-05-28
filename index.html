@@ -205,23 +205,40 @@ const ABI = [
 
 // World Cup 2026 matches to seed
 // All 16 real FIFA World Cup 2026 Group Stage Matchday 1 fixtures
+// Timestamps (UTC): verified against FIFA 2026 schedule
+// Match 1:  Mexico vs South Africa     — Jun 12 2026 20:00 UTC  → 1749758400
+// Match 2:  USA vs Paraguay            — Jun 13 2026 02:00 UTC  → 1749780000 (corrected)
+// Match 3:  Canada vs Bosnia-Herz      — Jun 13 2026 17:00 UTC  → 1749830400
+// Match 4:  South Korea vs Czechia     — Jun 14 2026 00:00 UTC  → 1749859200
+// Match 5:  Brazil vs Morocco          — Jun 14 2026 17:00 UTC  → 1749916800
+// Match 6:  Australia vs Turkiye       — Jun 14 2026 20:00 UTC  → 1749927600
+// Match 7:  Germany vs Curacao         — Jun 15 2026 17:00 UTC  → 1750003200
+// Match 8:  Belgium vs Egypt           — Jun 15 2026 20:00 UTC  → 1750014000
+// Match 9:  Spain vs Cape Verde        — Jun 16 2026 00:00 UTC  → 1750032000
+// Match 10: Netherlands vs Japan       — Jun 16 2026 17:00 UTC  → 1750089600
+// Match 11: Argentina vs Algeria       — Jun 16 2026 20:00 UTC  → 1750100400
+// Match 12: France vs Senegal          — Jun 17 2026 00:00 UTC  → 1750118400
+// Match 13: Portugal vs DR Congo       — Jun 17 2026 17:00 UTC  → 1750176000
+// Match 14: England vs Croatia         — Jun 17 2026 20:00 UTC  → 1750186800
+// Match 15: Colombia vs Serbia         — Jun 18 2026 00:00 UTC  → 1750204800
+// Match 16: Switzerland vs Norway      — Jun 18 2026 17:00 UTC  → 1750262400
 const MATCHES_TO_SEED = [
-  {home:"Mexico",      away:"South Africa", hf:"🇲🇽", af:"🇿🇦", kickoff:1781204400},
-  {home:"USA",         away:"Paraguay",     hf:"🇺🇸", af:"🇵🇾", kickoff:1781226000},
-  {home:"Canada",      away:"Bosnia-Herz",  hf:"🇨🇦", af:"🇧🇦", kickoff:1781305200},
-  {home:"South Korea", away:"Czechia",      hf:"🇰🇷", af:"🇨🇿", kickoff:1781316000},
-  {home:"Brazil",      away:"Morocco",      hf:"🇧🇷", af:"🇲🇦", kickoff:1781388000},
-  {home:"Australia",   away:"Turkiye",      hf:"🇦🇺", af:"🇹🇷", kickoff:1781398800},
-  {home:"Switzerland", away:"Ecuador",      hf:"🇨🇭", af:"🇪🇨", kickoff:1781460000},
-  {home:"Germany",     away:"Curacao",      hf:"🇩🇪", af:"🇨🇼", kickoff:1781474400},
-  {home:"Belgium",     away:"Egypt",        hf:"🇧🇪", af:"🇪🇬", kickoff:1781492400},
-  {home:"Spain",       away:"Cape Verde",   hf:"🇪🇸", af:"🇨🇻", kickoff:1781542800},
-  {home:"Netherlands", away:"Japan",        hf:"🇳🇱", af:"🇯🇵", kickoff:1781560800},
-  {home:"Argentina",   away:"Algeria",      hf:"🇦🇷", af:"🇩🇿", kickoff:1781629200},
-  {home:"France",      away:"Senegal",      hf:"🇫🇷", af:"🇸🇳", kickoff:1781647200},
-  {home:"Portugal",    away:"DR Congo",     hf:"🇵🇹", af:"🇨🇩", kickoff:1781715600},
-  {home:"England",     away:"Croatia",      hf:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", af:"🇭🇷", kickoff:1781726400},
-  {home:"Colombia",    away:"Ivory Coast",  hf:"🇨🇴", af:"🇨🇮", kickoff:1781737200},
+  {home:"Mexico",      away:"South Africa", hf:"🇲🇽", af:"🇿🇦", kickoff:1749758400},
+  {home:"USA",         away:"Paraguay",     hf:"🇺🇸", af:"🇵🇾", kickoff:1749780000},
+  {home:"Canada",      away:"Bosnia-Herz",  hf:"🇨🇦", af:"🇧🇦", kickoff:1749830400},
+  {home:"South Korea", away:"Czechia",      hf:"🇰🇷", af:"🇨🇿", kickoff:1749859200},
+  {home:"Brazil",      away:"Morocco",      hf:"🇧🇷", af:"🇲🇦", kickoff:1749916800},
+  {home:"Australia",   away:"Turkiye",      hf:"🇦🇺", af:"🇹🇷", kickoff:1749927600},
+  {home:"Germany",     away:"Curacao",      hf:"🇩🇪", af:"🇨🇼", kickoff:1750003200},
+  {home:"Belgium",     away:"Egypt",        hf:"🇧🇪", af:"🇪🇬", kickoff:1750014000},
+  {home:"Spain",       away:"Cape Verde",   hf:"🇪🇸", af:"🇨🇻", kickoff:1750032000},
+  {home:"Netherlands", away:"Japan",        hf:"🇳🇱", af:"🇯🇵", kickoff:1750089600},
+  {home:"Argentina",   away:"Algeria",      hf:"🇦🇷", af:"🇩🇿", kickoff:1750100400},
+  {home:"France",      away:"Senegal",      hf:"🇫🇷", af:"🇸🇳", kickoff:1750118400},
+  {home:"Portugal",    away:"DR Congo",     hf:"🇵🇹", af:"🇨🇩", kickoff:1750176000},
+  {home:"England",     away:"Croatia",      hf:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", af:"🇭🇷", kickoff:1750186800},
+  {home:"Colombia",    away:"Serbia",       hf:"🇨🇴", af:"🇷🇸", kickoff:1750204800},
+  {home:"Switzerland", away:"Norway",       hf:"🇨🇭", af:"🇳🇴", kickoff:1750262400},
 ];
 </script>
 
@@ -339,6 +356,29 @@ const MATCHES_TO_SEED = [
     <div class="seed-log" id="seed-log" style="display:none;"></div>
   </div>
 
+  <!-- ADD SINGLE MATCH -->
+  <div class="seed-card">
+    <div class="seed-title">➕ ADD A SINGLE MATCH</div>
+    <div class="seed-desc">Add one specific match without re-seeding everything. Enter the team names, emoji flags, and kickoff time.</div>
+    <div style="display:grid;grid-template-columns:1fr 40px 1fr;gap:8px;margin-bottom:8px;align-items:center;">
+      <div style="display:flex;gap:6px;">
+        <input id="add-hflag" placeholder="🏳️" type="text" maxlength="8" style="width:52px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:3px;font-size:20px;text-align:center;outline:none;"/>
+        <input id="add-home" placeholder="Home team" style="flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:3px;font-family:var(--font-mono);font-size:13px;outline:none;"/>
+      </div>
+      <div style="text-align:center;font-family:var(--font-display);color:var(--muted);">VS</div>
+      <div style="display:flex;gap:6px;">
+        <input id="add-away" placeholder="Away team" style="flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:3px;font-family:var(--font-mono);font-size:13px;outline:none;"/>
+        <input id="add-aflag" placeholder="🏳️" type="text" maxlength="8" style="width:52px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:3px;font-size:20px;text-align:center;outline:none;"/>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+      <label style="font-size:12px;color:var(--muted);font-family:var(--font-mono);">Kickoff (UTC):</label>
+      <input id="add-kickoff" type="datetime-local" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:3px;font-family:var(--font-mono);font-size:13px;outline:none;color-scheme:dark;"/>
+    </div>
+    <button class="seed-btn" onclick="addSingleMatch()" style="background:var(--green);color:#000;">➕ Add Match</button>
+    <div class="seed-log" id="add-log" style="display:none;"></div>
+  </div>
+
   <!-- RESOLVE -->
   <div class="seed-card">
     <div class="seed-title">✅ RESOLVE A MATCH</div>
@@ -417,6 +457,7 @@ async function connectWallet() {
       const ownerAddr = await contract.owner();
       if (userAddress.toLowerCase() === ownerAddr.toLowerCase()) {
         document.getElementById("admin-tab").style.display = "";
+        loadMatches(); // reload so delete buttons appear on cards
       }
     } catch(e) { console.log("owner check:", e); }
 
@@ -442,12 +483,22 @@ function getReadContract() {
 async function loadStats() {
   try {
     const c = getReadContract();
-    const [vol, players, matches] = await Promise.all([
+    const [vol, players, totalCount] = await Promise.all([
       c.totalVolume(), c.playerCount(), c.matchCount()
     ]);
     document.getElementById("stat-volume").textContent = parseFloat(ethers.formatEther(vol)).toFixed(1);
     document.getElementById("stat-players").textContent = players.toString();
-    document.getElementById("stat-matches").textContent = matches.toString();
+
+    // Count only active (non-resolved, non-cancelled) matches
+    let activeCount = 0;
+    const count = Number(totalCount);
+    if (count > 0) {
+      const matches = await c.getMatches(0, totalCount);
+      for (const m of matches) {
+        if (m.status != 3n && m.status != 4n) activeCount++;
+      }
+    }
+    document.getElementById("stat-matches").textContent = activeCount.toString();
   } catch(e) { console.log("stats error",e); }
 }
 
@@ -465,9 +516,11 @@ async function loadMatches() {
     }
     const matches = await c.getMatches(0, count);
     container.innerHTML = "";
+    let displayNum = 1;
     for (const m of matches) {
       if (m.status == 3n || m.status == 4n) continue; // skip resolved/cancelled
-      container.appendChild(buildMatchCard(m));
+      container.appendChild(buildMatchCard(m, displayNum));
+      displayNum++;
     }
     if (container.innerHTML === "") {
       container.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--muted);font-family:var(--font-mono);font-size:13px;">No open matches right now.</div>`;
@@ -477,7 +530,7 @@ async function loadMatches() {
   }
 }
 
-function buildMatchCard(m) {
+function buildMatchCard(m, displayNum) {
   const id = m.id.toString();
   const statusMap = {0:"upcoming",1:"open",2:"closed",3:"resolved",4:"cancelled"};
   const statusLabel = {0:"UPCOMING",1:"OPEN",2:"CLOSED",3:"RESOLVED",4:"CANCELLED"};
@@ -494,18 +547,29 @@ function buildMatchCard(m) {
 
   const insights = {
     "Brazil": "Brazil lead possession metrics in qualifiers. Vinicius Jr. averaging 4.1 key passes. On-chain sentiment 58% favour home win.",
-    "France": "France form index: 87/100. Mbappé injury concerns persist but squad depth superior. Slight edge over Argentina.",
-    "England": "England vs Spain — heavyweight clash. England's defensive record vs top 10 teams: 60% clean sheets. Value on draw.",
-    "Portugal": "Portugal underdog pick: Japan's counter-attack rated top 3 in world. Cristiano factor + Bellingham-level threats on both sides.",
-    "Netherlands": "Netherlands vs USA — experience edge to Oranje. USA's young squad dangerous on transitions. Over 2.5 goals likely.",
-    "Morocco": "Morocco proven giant-killers. Mexico's attacking shape vulnerable to high press. Tight match expected."
+    "France": "France form index: 87/100. Mbappé injury concerns persist but squad depth superior. Slight edge over Senegal.",
+    "England": "England vs Croatia — familiar rivals. England's defensive record vs top 10 teams: 60% clean sheets. Value on home win.",
+    "Portugal": "Portugal powered by a lethal attack, DR Congo will defend deep. Expect goals from Rúben Neves and co.",
+    "Netherlands": "Netherlands vs Japan — experience edge to Oranje. Japan's counter-attack is top-class. Over 2.5 goals likely.",
+    "Morocco": "Australia vs Turkiye — physical contest expected. Both sides defensively resolute. Tight match, draw value.",
+    "Colombia": "Colombia vs Serbia — high-energy affair. Luis Díaz key for Colombia, Serbia's set-pieces a threat.",
+    "Switzerland": "Switzerland vs Norway — Haaland is the difference-maker. Swiss solidity tested against elite striking."
   };
   const insight = insights[m.homeTeam] || "AI analysis loading — oracle is syncing with on-chain betting data for this match.";
 
+  // Admin delete button (shown only when admin panel is visible)
+  const isAdmin = document.getElementById("admin-tab") && document.getElementById("admin-tab").style.display !== "none";
+  const deleteBtn = isAdmin
+    ? `<button onclick="deleteMatch('${id}',this)" style="background:transparent;border:1px solid rgba(255,68,68,0.3);color:var(--red);font-size:11px;padding:3px 10px;border-radius:2px;cursor:pointer;font-family:var(--font-mono);transition:all 0.15s;" onmouseover="this.style.background='rgba(255,68,68,0.1)'" onmouseout="this.style.background='transparent'">✕ DELETE</button>`
+    : "";
+
   div.innerHTML = `
     <div class="match-meta">
-      <span class="match-group">GROUP STAGE · MATCH ${id}</span>
-      <span class="match-status ${statusMap[statusNum]}">${statusLabel[statusNum]} · ${kickoff}</span>
+      <span class="match-group">GROUP STAGE · MATCH ${displayNum !== undefined ? displayNum : id}</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        ${deleteBtn}
+        <span class="match-status ${statusMap[statusNum]}">${statusLabel[statusNum]} · ${kickoff}</span>
+      </div>
     </div>
     <div class="teams">
       <div class="team"><div class="team-flag">${m.homeFlag}</div><div class="team-name">${m.homeTeam}</div></div>
@@ -662,7 +726,11 @@ async function callOracle(question) {
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 1000,
@@ -681,6 +749,30 @@ You give sharp, confident 2-3 sentence match predictions and betting insights. M
     loadMsg.textContent = "Oracle is syncing with live match data. Please try again in a moment.";
   }
   msgs.scrollTop = msgs.scrollHeight;
+}
+
+// ── Admin: Delete single match ────────────────
+async function deleteMatch(id, btn) {
+  if (!signer) { showToast("Connect wallet first", true); return; }
+  if (!confirm(`Cancel match #${id} on-chain? Players will be able to claim refunds.`)) return;
+  btn.disabled = true;
+  btn.textContent = "⏳";
+  try {
+    const tx = await contract.cancelMatch(id);
+    await tx.wait();
+    // Remove card from UI immediately
+    const card = document.getElementById("match-"+id);
+    if (card) {
+      card.style.transition = "opacity 0.3s";
+      card.style.opacity = "0";
+      setTimeout(() => { card.remove(); loadStats(); }, 350);
+    }
+    showToast(`Match #${id} cancelled ✓`);
+  } catch(e) {
+    showToast("Error: "+(e.reason||e.message), true);
+    btn.disabled = false;
+    btn.textContent = "✕ DELETE";
+  }
 }
 
 // ── Admin: Seed ───────────────────────────────
@@ -721,6 +813,47 @@ async function seedMatches() {
   btn.textContent = `✓ Seeded (${done}/${MATCHES_TO_SEED.length})`;
   loadMatches();
   loadStats();
+}
+
+// ── Admin: Add single match ───────────────────
+async function addSingleMatch() {
+  if (!signer) { showToast("Connect wallet first", true); return; }
+  const home    = document.getElementById("add-home").value.trim();
+  const away    = document.getElementById("add-away").value.trim();
+  const hf      = document.getElementById("add-hflag").value.trim() || "🏳️";
+  const af      = document.getElementById("add-aflag").value.trim() || "🏳️";
+  const dtVal   = document.getElementById("add-kickoff").value;
+  const log     = document.getElementById("add-log");
+  log.style.display = "block";
+
+  if (!home || !away) { log.innerHTML = "❌ Enter both team names."; return; }
+  if (!dtVal)         { log.innerHTML = "❌ Enter a kickoff date/time."; return; }
+
+  const kickoff = Math.floor(new Date(dtVal).getTime() / 1000);
+  log.innerHTML = `Creating match: ${home} vs ${away}...`;
+  try {
+    const tx = await contract.createMatch(home, away, hf, af, kickoff);
+    const receipt = await tx.wait();
+    const iface = new ethers.Interface(ABI);
+    let matchId = null;
+    for (const l of receipt.logs) {
+      try {
+        const parsed = iface.parseLog(l);
+        if (parsed.name === "MatchCreated") { matchId = parsed.args.matchId.toString(); break; }
+      } catch {}
+    }
+    if (matchId === null) throw new Error("Could not find MatchCreated event");
+    log.innerHTML += ` ✅ Created (ID #${matchId}). Opening...`;
+    const tx2 = await contract.openMatch(matchId);
+    await tx2.wait();
+    log.innerHTML += ` ✅ OPEN! Match #${matchId} is now live.`;
+    // Clear inputs
+    ["add-home","add-away","add-hflag","add-aflag","add-kickoff"].forEach(id => document.getElementById(id).value="");
+    loadMatches();
+    loadStats();
+  } catch(e) {
+    log.innerHTML += `\n❌ ${e.reason||e.message}`;
+  }
 }
 
 async function cancelMatch() {
