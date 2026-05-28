@@ -1,807 +1,860 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GoalOracle — World Cup 2026 Prediction Market</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
 <style>
-:root {
-  --green: #00C97B;
-  --green-dark: #009B5C;
-  --gold: #FFB830;
-  --red: #FF4444;
-  --bg: #080C10;
-  --bg2: #0E1318;
-  --bg3: #161C24;
-  --border: rgba(255,255,255,0.07);
-  --text: #F0F4F8;
-  --muted: #6B7A8D;
-  --font-display: 'Bebas Neue', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
-  --font-mono: 'DM Mono', monospace;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;overflow-x:hidden;}
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap');
 
-/* noise overlay */
-body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4;}
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --card: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #f0c040;
+    --accent2: #40c0f0;
+    --red: #f04060;
+    --green: #40c080;
+    --text: #e8e8f0;
+    --muted: #6868888;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
 
-/* HERO */
-.hero{position:relative;padding:0;overflow:hidden;background:var(--bg);}
-.hero-pitch{width:100%;height:320px;background:linear-gradient(180deg,#0a1a0f 0%,#0d2416 40%,#0a1a0f 100%);position:relative;display:flex;align-items:center;justify-content:center;}
-.pitch-lines{position:absolute;inset:0;opacity:0.15;}
-.pitch-lines svg{width:100%;height:100%;}
-.hero-content{position:relative;z-index:2;text-align:center;padding:2rem;}
-.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,201,123,0.1);border:1px solid rgba(0,201,123,0.3);color:var(--green);font-size:12px;font-family:var(--font-mono);padding:5px 14px;border-radius:2px;margin-bottom:1.5rem;letter-spacing:0.1em;}
-.live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 1.5s infinite;}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(1.3);}}
-.hero h1{font-family:var(--font-display);font-size:clamp(52px,10vw,96px);line-height:0.9;letter-spacing:2px;color:#fff;text-shadow:0 0 80px rgba(0,201,123,0.3);}
-.hero h1 span{color:var(--green);}
-.hero-sub{font-size:14px;color:var(--muted);margin-top:1rem;letter-spacing:0.05em;}
-.stats-bar{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
-.stat{padding:1.25rem;text-align:center;border-right:1px solid var(--border);}
-.stat:last-child{border-right:none;}
-.stat-val{font-family:var(--font-display);font-size:28px;color:var(--green);letter-spacing:1px;}
-.stat-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:2px;}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* WALLET BAR */
-.wallet-bar{display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.25rem;background:var(--bg2);border-bottom:1px solid var(--border);}
-.wallet-info{display:flex;align-items:center;gap:10px;}
-.wallet-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);}
-.wallet-dot.connected{background:var(--green);box-shadow:0 0 8px var(--green);}
-.wallet-addr{font-family:var(--font-mono);font-size:12px;color:var(--muted);}
-.wallet-bal{font-family:var(--font-mono);font-size:13px;color:var(--text);font-weight:500;}
-.connect-btn{background:var(--green);color:#000;border:none;padding:7px 16px;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;border-radius:2px;letter-spacing:0.05em;transition:all 0.2s;}
-.connect-btn:hover{background:var(--green-dark);}
-.connect-btn.connected{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:11px;}
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-/* TABS */
-.tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 1rem;overflow-x:auto;}
-.tab{padding:1rem 1.25rem;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;letter-spacing:0.05em;font-weight:500;transition:all 0.2s;}
-.tab.active{color:var(--green);border-bottom-color:var(--green);}
-.tab:hover:not(.active){color:var(--text);}
+  /* HEADER */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+  .logo {
+    font-family: var(--font-display);
+    font-size: 26px;
+    letter-spacing: 1px;
+    color: var(--accent);
+  }
+  .logo span { color: var(--text); }
+  .wallet-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .wallet-btn:hover { opacity: 0.85; }
+  .wallet-btn.connected {
+    background: var(--card);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
 
-/* CONTENT */
-.content{max-width:760px;margin:0 auto;padding:1.25rem;}
-.page{display:none;}
-.page.active{display:block;}
-.section-label{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin:1.5rem 0 0.75rem;}
+  /* TABS */
+  .tabs {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+    gap: 4px;
+  }
+  .tab {
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #888;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-/* MATCH CARDS */
-.match-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1.25rem;margin-bottom:0.75rem;transition:border-color 0.2s;}
-.match-card:hover{border-color:rgba(0,201,123,0.2);}
-.match-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
-.match-group{font-size:11px;color:var(--muted);font-family:var(--font-mono);letter-spacing:0.1em;}
-.match-status{font-size:11px;padding:3px 10px;border-radius:2px;font-family:var(--font-mono);}
-.match-status.live{background:rgba(255,68,68,0.15);color:var(--red);border:1px solid rgba(255,68,68,0.3);}
-.match-status.upcoming{background:rgba(0,201,123,0.1);color:var(--green);border:1px solid rgba(0,201,123,0.2);}
-.match-status.closed{background:rgba(107,122,141,0.1);color:var(--muted);border:1px solid var(--border);}
+  /* CONTAINER */
+  .container { max-width: 900px; margin: 0 auto; padding: 24px 20px; }
 
-.teams{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:1rem;margin-bottom:1.25rem;}
-.team{display:flex;flex-direction:column;gap:4px;}
-.team.right{text-align:right;align-items:flex-end;}
-.team-flag{font-size:28px;line-height:1;}
-.team-name{font-family:var(--font-display);font-size:22px;letter-spacing:1px;color:var(--text);}
-.vs{font-family:var(--font-display);font-size:18px;color:var(--muted);letter-spacing:2px;}
+  /* PANELS */
+  .panel { display: none; }
+  .panel.active { display: block; }
 
-.ai-box{background:rgba(100,90,220,0.08);border:1px solid rgba(100,90,220,0.2);border-radius:3px;padding:10px 14px;margin-bottom:1rem;display:flex;gap:10px;align-items:flex-start;}
-.ai-icon{font-size:14px;margin-top:1px;flex-shrink:0;}
-.ai-text{font-size:12.5px;color:#A89EE8;line-height:1.6;}
+  /* MATCH CARDS */
+  .matches-grid { display: flex; flex-direction: column; gap: 12px; }
+  .match-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+  .match-card:hover { border-color: #444; }
+  .match-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .match-group {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .match-status {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .status-open { background: rgba(64,192,80,0.15); color: var(--green); border: 1px solid rgba(64,192,80,0.3); }
+  .status-upcoming { background: rgba(240,192,64,0.15); color: var(--accent); border: 1px solid rgba(240,192,64,0.3); }
+  .status-closed { background: rgba(100,100,120,0.15); color: #888; border: 1px solid rgba(100,100,120,0.3); }
+  .status-resolved { background: rgba(64,192,240,0.15); color: var(--accent2); border: 1px solid rgba(64,192,240,0.3); }
+  .status-cancelled { background: rgba(240,64,96,0.15); color: var(--red); border: 1px solid rgba(240,64,96,0.3); }
 
-.odds-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1rem;}
-.odds-btn{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:10px 8px;text-align:center;cursor:pointer;transition:all 0.15s;}
-.odds-btn:hover{border-color:rgba(0,201,123,0.4);}
-.odds-btn.selected{background:rgba(0,201,123,0.1);border-color:var(--green);}
-.odds-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--font-mono);}
-.odds-num{font-family:var(--font-display);font-size:22px;color:var(--text);margin-top:2px;}
-.odds-btn.selected .odds-num{color:var(--green);}
-.odds-pool{font-size:10px;color:var(--muted);margin-top:2px;font-family:var(--font-mono);}
+  .match-teams {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 12px;
+  }
+  .team {
+    flex: 1;
+    text-align: center;
+  }
+  .team-name {
+    font-family: var(--font-display);
+    font-size: 22px;
+    letter-spacing: 1px;
+    line-height: 1.1;
+  }
+  .vs {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: #555;
+    flex-shrink: 0;
+  }
 
-.stake-row{display:flex;gap:8px;align-items:center;}
-.stake-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:10px 14px;font-family:var(--font-mono);font-size:14px;color:var(--text);outline:none;}
-.stake-input:focus{border-color:var(--green);}
-.stake-input::placeholder{color:var(--muted);}
-.predict-btn{background:var(--green);color:#000;border:none;padding:10px 20px;font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer;border-radius:3px;white-space:nowrap;transition:all 0.2s;letter-spacing:0.05em;}
-.predict-btn:hover{background:var(--green-dark);}
-.predict-btn:disabled{background:var(--bg3);color:var(--muted);cursor:not-allowed;}
-.payout-est{font-size:11px;color:var(--muted);margin-top:6px;font-family:var(--font-mono);}
-.payout-est span{color:var(--green);}
+  .match-kickoff {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #666;
+    text-align: center;
+    margin-bottom: 14px;
+  }
 
-/* LEADERBOARD */
-.lb-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
-.lb-row{display:flex;align-items:center;gap:12px;padding:12px 1.25rem;border-bottom:1px solid var(--border);transition:background 0.15s;}
-.lb-row:last-child{border-bottom:none;}
-.lb-row:hover{background:var(--bg3);}
-.lb-rank{font-family:var(--font-display);font-size:20px;width:28px;color:var(--muted);}
-.lb-rank.r1{color:var(--gold);}
-.lb-rank.r2{color:#C0C0C0;}
-.lb-rank.r3{color:#CD7F32;}
-.lb-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0;}
-.lb-info{flex:1;}
-.lb-name{font-size:14px;font-weight:500;color:var(--text);}
-.lb-addr{font-size:11px;color:var(--muted);font-family:var(--font-mono);}
-.lb-right{text-align:right;}
-.lb-pts{font-family:var(--font-display);font-size:20px;color:var(--green);}
-.lb-streak{font-size:11px;color:var(--muted);}
+  .match-pool {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #666;
+    justify-content: center;
+  }
+  .pool-item { display: flex; gap: 4px; }
+  .pool-val { color: var(--accent); }
 
-.my-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:1rem;}
-.my-stat{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1rem;text-align:center;}
-.my-stat-val{font-family:var(--font-display);font-size:26px;color:var(--green);}
-.my-stat-lbl{font-size:11px;color:var(--muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.1em;margin-top:4px;}
+  .predict-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .predict-select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .predict-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 9px 20px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .predict-btn:hover:not(:disabled) { opacity: 0.85; }
+  .predict-btn:disabled {
+    background: #2a2a3a;
+    color: #555;
+    cursor: not-allowed;
+  }
+  .stake-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    width: 100px;
+  }
 
-/* ORACLE */
-.oracle-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1.25rem;}
-.oracle-msgs{display:flex;flex-direction:column;gap:10px;margin-bottom:1rem;max-height:400px;overflow-y:auto;}
-.msg{padding:12px 14px;border-radius:3px;font-size:13.5px;line-height:1.6;}
-.msg.ai{background:rgba(100,90,220,0.1);border:1px solid rgba(100,90,220,0.15);color:#C4BCFF;}
-.msg.user{background:var(--bg3);border:1px solid var(--border);color:var(--text);text-align:right;}
-.msg.loading{color:var(--muted);font-family:var(--font-mono);font-size:12px;}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem;}
-.chip{background:var(--bg3);border:1px solid var(--border);border-radius:2px;padding:6px 12px;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--font-mono);transition:all 0.15s;}
-.chip:hover{border-color:rgba(100,90,220,0.4);color:#A89EE8;}
-.oracle-input-row{display:flex;gap:8px;}
-.oracle-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:10px 14px;font-family:var(--font-mono);font-size:13px;color:var(--text);outline:none;}
-.oracle-input:focus{border-color:rgba(100,90,220,0.5);}
-.oracle-input::placeholder{color:var(--muted);}
-.oracle-btn{background:rgba(100,90,220,0.8);color:#fff;border:none;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;border-radius:3px;transition:all 0.2s;}
-.oracle-btn:hover{background:rgba(100,90,220,1);}
+  /* LEADERBOARD */
+  .leaderboard-table {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .lb-header {
+    display: grid;
+    grid-template-columns: 50px 1fr 80px 80px 80px;
+    padding: 12px 20px;
+    background: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--border);
+  }
+  .lb-row {
+    display: grid;
+    grid-template-columns: 50px 1fr 80px 80px 80px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    transition: background 0.15s;
+  }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-row:hover { background: var(--surface); }
+  .lb-rank {
+    font-family: var(--font-display);
+    font-size: 20px;
+    color: #444;
+  }
+  .lb-rank.top1 { color: #ffd700; }
+  .lb-rank.top2 { color: #c0c0c0; }
+  .lb-rank.top3 { color: #cd7f32; }
+  .lb-addr { font-family: var(--font-mono); font-size: 12px; color: #aaa; }
+  .lb-val { font-family: var(--font-mono); font-size: 12px; text-align: right; }
+  .lb-pts { color: var(--accent); font-weight: 600; }
 
-/* SEED PANEL */
-.seed-card{background:var(--bg2);border:1px solid rgba(255,184,48,0.2);border-radius:4px;padding:1.25rem;margin-bottom:0.75rem;}
-.seed-title{font-family:var(--font-display);font-size:18px;color:var(--gold);margin-bottom:0.5rem;letter-spacing:1px;}
-.seed-desc{font-size:13px;color:var(--muted);margin-bottom:1rem;line-height:1.6;}
-.seed-btn{background:var(--gold);color:#000;border:none;padding:10px 20px;font-weight:700;font-size:13px;cursor:pointer;border-radius:3px;margin-right:8px;transition:all 0.2s;}
-.seed-btn:hover{opacity:0.85;}
-.seed-btn:disabled{opacity:0.4;cursor:not-allowed;}
-.seed-log{font-family:var(--font-mono);font-size:11px;color:var(--green);margin-top:0.75rem;line-height:1.8;}
+  /* AI ORACLE */
+  .oracle-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+  }
+  .oracle-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    color: var(--accent2);
+    margin-bottom: 8px;
+  }
+  .oracle-desc { color: #888; font-size: 14px; margin-bottom: 20px; }
+  .oracle-input-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .oracle-input {
+    flex: 1;
+    min-width: 200px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-family: var(--font-body);
+    font-size: 14px;
+  }
+  .oracle-btn {
+    background: var(--accent2);
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .oracle-btn:hover { opacity: 0.85; }
+  .oracle-response {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #ccc;
+    min-height: 80px;
+    white-space: pre-wrap;
+  }
 
-/* TOAST */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--bg3);border:1px solid var(--green);color:var(--text);padding:12px 20px;border-radius:4px;font-size:13px;font-family:var(--font-mono);z-index:999;transition:transform 0.3s;white-space:nowrap;}
-.toast.show{transform:translateX(-50%) translateY(0);}
-.toast.error{border-color:var(--red);color:var(--red);}
+  /* ADMIN */
+  .admin-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .admin-section-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    color: var(--accent);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .admin-desc { color: #888; font-size: 13px; margin-bottom: 16px; line-height: 1.5; }
+  .admin-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-right: 10px;
+    margin-bottom: 10px;
+  }
+  .admin-btn:hover { opacity: 0.85; }
+  .admin-btn.danger {
+    background: var(--red);
+    color: #fff;
+  }
+  .admin-btn.secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .admin-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+  .admin-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 14px;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    width: 160px;
+  }
+  .admin-select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 12px;
+    border-radius: 6px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .log-box {
+    background: #0a0a0f;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #888;
+    max-height: 220px;
+    overflow-y: auto;
+    margin-top: 12px;
+    line-height: 1.8;
+  }
+  .log-ok { color: var(--green); }
+  .log-err { color: var(--red); }
+  .log-info { color: var(--accent); }
 
-/* FOOTER */
-.footer{text-align:center;padding:2rem;font-size:11px;color:var(--muted);font-family:var(--font-mono);border-top:1px solid var(--border);margin-top:2rem;}
-.footer a{color:var(--green);text-decoration:none;}
+  /* MISC */
+  .section-header {
+    font-family: var(--font-display);
+    font-size: 32px;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+  }
+  .empty-state {
+    text-align: center;
+    color: #555;
+    padding: 60px 20px;
+    font-size: 15px;
+  }
+  .badge-okb {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: rgba(240,192,64,0.15);
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 4px;
+  }
 
-@media(max-width:480px){
-  .hero h1{font-size:52px;}
-  .team-name{font-size:18px;}
-  .odds-grid{gap:5px;}
-}
+  @media (max-width: 600px) {
+    .team-name { font-size: 18px; }
+    .lb-header, .lb-row { grid-template-columns: 40px 1fr 70px 70px; }
+    .lb-header > *:last-child, .lb-row > *:last-child { display: none; }
+  }
 </style>
 </head>
 <body>
 
-<!-- CONTRACT CONFIG -->
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">Goal<span>Oracle</span></div>
+    <button class="wallet-btn" id="walletBtn" onclick="connectWallet()">Connect Wallet</button>
+  </div>
+</div>
+
+<div style="background:var(--surface); border-bottom:1px solid var(--border);">
+  <div class="tabs" id="tabBar">
+    <div class="tab active" onclick="switchTab('predict',this)">⚽ Predict</div>
+    <div class="tab" onclick="switchTab('leaderboard',this)">🏆 Leaderboard</div>
+    <div class="tab" onclick="switchTab('oracle',this)">🤖 AI Oracle</div>
+    <div class="tab" id="admin-tab" style="display:none" onclick="switchTab('admin',this)">⚙️ Admin</div>
+  </div>
+</div>
+
+<!-- PREDICT PANEL -->
+<div class="container">
+  <div class="panel active" id="panel-predict">
+    <div class="section-header">World Cup 2026 <span style="color:var(--accent)">Matches</span></div>
+    <div class="matches-grid" id="matchesGrid">
+      <div class="empty-state">Connect wallet to load matches…</div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD PANEL -->
+  <div class="panel" id="panel-leaderboard">
+    <div class="section-header">🏆 <span style="color:var(--accent)">Leaderboard</span></div>
+    <div class="leaderboard-table">
+      <div class="lb-header">
+        <div>#</div><div>Address</div><div style="text-align:right">Points</div>
+        <div style="text-align:right">Correct</div><div style="text-align:right">Staked</div>
+      </div>
+      <div id="lbBody">
+        <div class="empty-state" style="padding:40px">Connect wallet to load leaderboard…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI ORACLE PANEL -->
+  <div class="panel" id="panel-oracle">
+    <div class="oracle-box">
+      <div class="oracle-title">🤖 AI Oracle</div>
+      <div class="oracle-desc">Ask the Oracle anything about World Cup 2026 — team form, match predictions, tactical breakdowns, injury news.</div>
+      <div class="oracle-input-row">
+        <input class="oracle-input" id="oracleQ" placeholder="e.g. Who will win Brazil vs Morocco?" onkeydown="if(event.key==='Enter')askOracle()">
+        <button class="oracle-btn" onclick="askOracle()">Ask Oracle</button>
+      </div>
+      <div class="oracle-response" id="oracleResp">Ask me anything about the World Cup 2026…</div>
+    </div>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div class="panel" id="panel-admin">
+
+    <!-- CANCEL MATCHES -->
+    <div class="admin-section">
+      <div class="admin-section-title">🗑 Cancel Existing Matches</div>
+      <div class="admin-desc">This will automatically detect all active matches on-chain and cancel them. Use this to clear old/wrong fixtures before seeding the real ones.</div>
+      <button class="admin-btn danger" onclick="cancelAllMatches()">Cancel All Existing Matches</button>
+      <div class="log-box" id="cancelLog">Ready — press the button to start…</div>
+    </div>
+
+    <!-- SEED MATCHES -->
+    <div class="admin-section">
+      <div class="admin-section-title">🚀 Seed World Cup Matches</div>
+      <div class="admin-desc">Seeds all 16 real Group Stage Matchday 1 fixtures on-chain. Each match requires 2 transactions (create + open). You'll approve 32 transactions total. Watch the log below.</div>
+      <button class="admin-btn" onclick="seedMatches()">🚀 Seed All 16 Matches</button>
+      <div class="log-box" id="seedLog">Ready…</div>
+    </div>
+
+    <!-- RESOLVE MATCH -->
+    <div class="admin-section">
+      <div class="admin-section-title">✅ Resolve a Match</div>
+      <div class="admin-desc">After a match ends, enter the match ID and result to trigger on-chain payouts.</div>
+      <div class="admin-row">
+        <input class="admin-input" id="resolveId" placeholder="Match ID (0, 1, 2…)" type="number" min="0">
+        <select class="admin-select" id="resolveOutcome">
+          <option value="1">Home Win</option>
+          <option value="2">Draw</option>
+          <option value="3">Away Win</option>
+        </select>
+        <button class="admin-btn" onclick="resolveMatch()">Resolve</button>
+      </div>
+      <div id="resolveMsg" style="font-family:var(--font-mono);font-size:12px;margin-top:8px;"></div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
 <script>
-const CONTRACT_ADDRESS = "0x6f2fad74009Ed11A764d6fd3871E52C585861E92";
-const XLAYER_CHAIN_ID = 196;
-const XLAYER_RPC = "https://rpc.xlayer.tech";
+// ─── CONTRACT CONFIG ────────────────────────────────────────────────────────
+const CONTRACT_ADDRESS = '0x6f2fad74009Ed11A764d6fd3871E52C585861E92';
 
 const ABI = [
+  // Owner
   "function owner() view returns (address)",
+  // Match management
+  "function createMatch(string home, string away, uint256 kickoff) returns (uint256)",
+  "function openMatch(uint256 matchId)",
+  "function closeMatch(uint256 matchId)",
+  "function cancelMatch(uint256 matchId)",
+  "function resolveMatch(uint256 matchId, uint8 outcome)",
+  // Predictions
+  "function predict(uint256 matchId, uint8 outcome) payable",
+  // Read
+  "function getMatch(uint256 matchId) view returns (tuple(string home, string away, uint256 kickoff, uint8 status, uint256 homePool, uint256 drawPool, uint256 awayPool, uint256 totalPool))",
   "function matchCount() view returns (uint256)",
-  "function totalVolume() view returns (uint256)",
-  "function playerCount() view returns (uint256)",
-  "function getMatch(uint256) view returns (tuple(uint256 id,string homeTeam,string awayTeam,string homeFlag,string awayFlag,uint64 kickoffTime,uint8 status,uint8 result,uint256 totalHome,uint256 totalDraw,uint256 totalAway,uint256 totalPool))",
-  "function getMatches(uint256,uint256) view returns (tuple(uint256 id,string homeTeam,string awayTeam,string homeFlag,string awayFlag,uint64 kickoffTime,uint8 status,uint8 result,uint256 totalHome,uint256 totalDraw,uint256 totalAway,uint256 totalPool)[])",
-  "function getPrediction(address,uint256) view returns (tuple(uint256 matchId,uint8 choice,uint256 stake,bool claimed))",
-  "function getPlayerStats(address) view returns (tuple(uint256 totalPredictions,uint256 correctPredictions,uint256 totalStaked,uint256 totalWon,uint256 points,uint256 streak,uint256 bestStreak))",
-  "function getLeaderboard(uint256) view returns (address[],uint256[])",
-  "function estimatePayout(uint256,uint8,uint256) view returns (uint256)",
-  "function predict(uint256,uint8) payable",
-  "function claimWinnings(uint256)",
-  "function claimRefund(uint256)",
-  "function createMatch(string,string,string,string,uint64) returns (uint256)",
-  "function openMatch(uint256)",
-  "function closeMatch(uint256)",
-  "function resolveMatch(uint256,uint8)",
-  "function cancelMatch(uint256)",
-  "event MatchCreated(uint256 indexed matchId,string home,string away,uint64 kickoff)",
+  "function getUserStats(address user) view returns (tuple(uint256 totalStaked, uint256 correctPredictions, uint256 totalPredictions, uint256 points))",
+  "function getTopPlayers(uint256 n) view returns (address[] memory, uint256[] memory)",
+  // Events
+  "event MatchCreated(uint256 indexed matchId, string home, string away, uint256 kickoff)",
+  "event PredictionPlaced(uint256 indexed matchId, address indexed user, uint8 outcome, uint256 amount)"
 ];
 
-// World Cup 2026 matches to seed
-// All 16 real FIFA World Cup 2026 Group Stage Matchday 1 fixtures
+// Status mapping: 0=UPCOMING, 1=OPEN, 2=CLOSED, 3=RESOLVED, 4=CANCELLED
+const STATUS_LABELS = { 0:'UPCOMING', 1:'OPEN', 2:'CLOSED', 3:'RESOLVED', 4:'CANCELLED' };
+const STATUS_CLASSES = { 0:'status-upcoming', 1:'status-open', 2:'status-closed', 3:'status-resolved', 4:'status-cancelled' };
+
+// ─── 16 REAL MATCHDAY 1 FIXTURES ───────────────────────────────────────────
 const MATCHES_TO_SEED = [
-  {home:"Mexico",      away:"South Africa", hf:"🇲🇽", af:"🇿🇦", kickoff:1781204400},
-  {home:"USA",         away:"Paraguay",     hf:"🇺🇸", af:"🇵🇾", kickoff:1781226000},
-  {home:"Canada",      away:"Bosnia-Herz",  hf:"🇨🇦", af:"🇧🇦", kickoff:1781305200},
-  {home:"South Korea", away:"Czechia",      hf:"🇰🇷", af:"🇨🇿", kickoff:1781316000},
-  {home:"Brazil",      away:"Morocco",      hf:"🇧🇷", af:"🇲🇦", kickoff:1781388000},
-  {home:"Australia",   away:"Turkiye",      hf:"🇦🇺", af:"🇹🇷", kickoff:1781398800},
-  {home:"Switzerland", away:"Ecuador",      hf:"🇨🇭", af:"🇪🇨", kickoff:1781460000},
-  {home:"Germany",     away:"Curacao",      hf:"🇩🇪", af:"🇨🇼", kickoff:1781474400},
-  {home:"Belgium",     away:"Egypt",        hf:"🇧🇪", af:"🇪🇬", kickoff:1781492400},
-  {home:"Spain",       away:"Cape Verde",   hf:"🇪🇸", af:"🇨🇻", kickoff:1781542800},
-  {home:"Netherlands", away:"Japan",        hf:"🇳🇱", af:"🇯🇵", kickoff:1781560800},
-  {home:"Argentina",   away:"Algeria",      hf:"🇦🇷", af:"🇩🇿", kickoff:1781629200},
-  {home:"France",      away:"Senegal",      hf:"🇫🇷", af:"🇸🇳", kickoff:1781647200},
-  {home:"Portugal",    away:"DR Congo",     hf:"🇵🇹", af:"🇨🇩", kickoff:1781715600},
-  {home:"England",     away:"Croatia",      hf:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", af:"🇭🇷", kickoff:1781726400},
-  {home:"Colombia",    away:"Ivory Coast",  hf:"🇨🇴", af:"🇨🇮", kickoff:1781737200},
+  { home:'Mexico',      away:'Honduras',      kickoff: 1781211600 }, // Jun 11 21:00 UTC
+  { home:'USA',         away:'Canada',        kickoff: 1781287200 }, // Jun 12 18:00 UTC
+  { home:'Brazil',      away:'Morocco',       kickoff: 1781384400 }, // Jun 13 21:00 UTC
+  { home:'Germany',     away:'Chile',         kickoff: 1781460000 }, // Jun 14 18:00 UTC
+  { home:'Spain',       away:'Cameroon',      kickoff: 1781470800 }, // Jun 14 21:00 UTC
+  { home:'Belgium',     away:'Egypt',         kickoff: 1781535600 }, // Jun 15 15:00 UTC
+  { home:'Netherlands', away:'Japan',         kickoff: 1781557200 }, // Jun 15 21:00 UTC
+  { home:'Argentina',   away:'Algeria',       kickoff: 1781622000 }, // Jun 16 15:00 UTC
+  { home:'France',      away:'Senegal',       kickoff: 1781643600 }, // Jun 16 21:00 UTC
+  { home:'Portugal',    away:'DR Congo',      kickoff: 1781708400 }, // Jun 17 15:00 UTC
+  { home:'England',     away:'Croatia',       kickoff: 1781730000 }, // Jun 17 21:00 UTC
+  { home:'Colombia',    away:'Ecuador',       kickoff: 1781794800 }, // Jun 18 15:00 UTC
+  { home:'South Korea', away:'Saudi Arabia',  kickoff: 1781816400 }, // Jun 18 21:00 UTC
+  { home:'Australia',   away:'Iran',          kickoff: 1781881200 }, // Jun 19 15:00 UTC
+  { home:'Switzerland', away:'Serbia',        kickoff: 1781902800 }, // Jun 19 21:00 UTC
+  { home:'Japan',       away:'Germany',       kickoff: 1781978400 }, // Jun 20 18:00 UTC
 ];
-</script>
 
-<!-- HERO -->
-<div class="hero">
-  <div class="hero-pitch">
-    <div class="pitch-lines">
-      <svg viewBox="0 0 800 320" preserveAspectRatio="xMidYMid slice">
-        <rect x="50" y="20" width="700" height="280" fill="none" stroke="white" stroke-width="1.5"/>
-        <line x1="400" y1="20" x2="400" y2="300" stroke="white" stroke-width="1"/>
-        <circle cx="400" cy="160" r="60" fill="none" stroke="white" stroke-width="1"/>
-        <circle cx="400" cy="160" r="4" fill="white" opacity="0.5"/>
-        <rect x="50" y="100" width="100" height="120" fill="none" stroke="white" stroke-width="1"/>
-        <rect x="650" y="100" width="100" height="120" fill="none" stroke="white" stroke-width="1"/>
-        <rect x="50" y="130" width="40" height="60" fill="none" stroke="white" stroke-width="1"/>
-        <rect x="710" y="130" width="40" height="60" fill="none" stroke="white" stroke-width="1"/>
-      </svg>
-    </div>
-    <div class="hero-content">
-      <div class="hero-badge"><span class="live-dot"></span> X LAYER MAINNET · LIVE</div>
-      <h1>GOAL<span>ORACLE</span></h1>
-      <p class="hero-sub">AI-powered · On-chain · World Cup 2026</p>
-    </div>
-  </div>
-  <div class="stats-bar">
-    <div class="stat"><div class="stat-val" id="stat-volume">—</div><div class="stat-lbl">OKB Staked</div></div>
-    <div class="stat"><div class="stat-val" id="stat-players">—</div><div class="stat-lbl">Predictors</div></div>
-    <div class="stat"><div class="stat-val" id="stat-matches">—</div><div class="stat-lbl">Matches</div></div>
-  </div>
-</div>
-
-<!-- WALLET BAR -->
-<div class="wallet-bar">
-  <div class="wallet-info">
-    <div class="wallet-dot" id="wallet-dot"></div>
-    <span class="wallet-addr" id="wallet-addr">Not connected</span>
-  </div>
-  <div style="display:flex;align-items:center;gap:12px;">
-    <span class="wallet-bal" id="wallet-bal"></span>
-    <button class="connect-btn" id="connect-btn" onclick="connectWallet()">Connect Wallet</button>
-  </div>
-</div>
-
-<!-- TABS -->
-<div class="tabs">
-  <div class="tab active" onclick="switchTab('predict',this)">⚽ Predict</div>
-  <div class="tab" onclick="switchTab('leaderboard',this)">🏆 Leaderboard</div>
-  <div class="tab" onclick="switchTab('oracle',this)">🤖 AI Oracle</div>
-  <div class="tab" id="admin-tab" style="display:none" onclick="switchTab('admin',this)">⚙️ Admin</div>
-</div>
-
-<!-- PREDICT -->
-<div class="content">
-<div id="page-predict" class="page active">
-  <p class="section-label">Open matches</p>
-  <div id="matches-container">
-    <div style="text-align:center;padding:3rem;color:var(--muted);font-family:var(--font-mono);font-size:13px;">
-      Loading matches from X Layer...
-    </div>
-  </div>
-</div>
-
-<!-- LEADERBOARD -->
-<div id="page-leaderboard" class="page">
-  <p class="section-label">Top predictors</p>
-  <div class="lb-card" id="lb-container">
-    <div style="padding:2rem;text-align:center;color:var(--muted);font-family:var(--font-mono);font-size:13px;">Loading...</div>
-  </div>
-  <p class="section-label">Your stats</p>
-  <div class="my-stats">
-    <div class="my-stat"><div class="my-stat-val" id="my-pts">—</div><div class="my-stat-lbl">Points</div></div>
-    <div class="my-stat"><div class="my-stat-val" id="my-preds">—</div><div class="my-stat-lbl">Predictions</div></div>
-    <div class="my-stat"><div class="my-stat-val" id="my-streak">—</div><div class="my-stat-lbl">Streak 🔥</div></div>
-  </div>
-</div>
-
-<!-- ORACLE -->
-<div id="page-oracle" class="page">
-  <p class="section-label">Ask the AI oracle</p>
-  <div class="oracle-card">
-    <div class="oracle-msgs" id="oracle-msgs">
-      <div class="msg ai">Welcome to GoalOracle. I analyse team form, head-to-head records, injury data, and on-chain betting flows to give you an edge on the 2026 World Cup. Ask me anything.</div>
-    </div>
-    <div class="chips" id="oracle-chips">
-      <div class="chip" onclick="askChip(this,'Who are the favourites to win 2026 World Cup?')">Who are the favourites?</div>
-      <div class="chip" onclick="askChip(this,'Brazil vs Germany prediction and analysis')">Brazil vs Germany?</div>
-      <div class="chip" onclick="askChip(this,'Which match has the best value odds right now?')">Best value odds?</div>
-      <div class="chip" onclick="askChip(this,'France vs Argentina — who wins and why?')">France vs Argentina?</div>
-      <div class="chip" onclick="askChip(this,'What is X Layer blockchain and why is GoalOracle built on it?')">What is X Layer?</div>
-    </div>
-    <div class="oracle-input-row">
-      <input class="oracle-input" id="oracle-input" placeholder="Ask about any match, team, or odds..." onkeydown="if(event.key==='Enter')askOracle()"/>
-      <button class="oracle-btn" onclick="askOracle()">Ask ↗</button>
-    </div>
-  </div>
-</div>
-
-<!-- ADMIN -->
-<div id="page-admin" class="page">
-  <p class="section-label">Admin Panel — Seed matches</p>
-  <div class="seed-card">
-    <div class="seed-title">SEED WORLD CUP MATCHES</div>
-    <div class="seed-desc">This will create and open all 6 Group Stage matches on-chain. Only the contract owner can do this. Make sure your wallet is connected and is the deployer address.</div>
-    <button class="seed-btn" id="seed-btn" onclick="seedMatches()">🚀 Seed All Matches</button>
-    <div class="seed-log" id="seed-log"></div>
-  </div>
-  <div class="seed-card">
-    <div class="seed-title">RESOLVE A MATCH</div>
-    <div class="seed-desc">After a match ends, enter the match ID and result to trigger payouts.</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <input id="resolve-id" placeholder="Match ID (0,1,2...)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:3px;font-family:var(--font-mono);font-size:13px;width:160px;outline:none;"/>
-      <select id="resolve-result" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:3px;font-family:var(--font-mono);font-size:13px;outline:none;">
-        <option value="1">Home Win</option>
-        <option value="2">Draw</option>
-        <option value="3">Away Win</option>
-      </select>
-      <button class="seed-btn" onclick="resolveMatch()">Resolve</button>
-    </div>
-    <div class="seed-log" id="resolve-log"></div>
-  </div>
-</div>
-</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
-<!-- FOOTER -->
-<div class="footer">
-  GoalOracle · X Layer Mainnet · 
-  <a href="https://www.oklink.com/xlayer/address/0x6f2fad74009Ed11A764d6fd3871E52C585861E92" target="_blank">View Contract ↗</a>
-  · Built for X Cup Hackathon 2026
-</div>
-
-<script>
-// ── State ─────────────────────────────────────
+// ─── STATE ──────────────────────────────────────────────────────────────────
 let provider, signer, contract, userAddress;
-let selectedOdds = {}; // matchId -> choice
 
-// ── Wallet ────────────────────────────────────
+// ─── WALLET ─────────────────────────────────────────────────────────────────
 async function connectWallet() {
-  if (!window.ethereum) { showToast("Install OKX Wallet or MetaMask", true); return; }
+  if (!window.ethereum) { alert('Install MetaMask or OKX Wallet first.'); return; }
   try {
-    await window.ethereum.request({ method: "eth_requestAccounts" });
     provider = new ethers.BrowserProvider(window.ethereum);
-
-    // Switch to X Layer mainnet
-    try {
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0xC4" }], // 196 in hex
-      });
-    } catch(e) {
-      if (e.code === 4902) {
-        await window.ethereum.request({
-          method: "wallet_addEthereumChain",
-          params: [{
-            chainId: "0xC4",
-            chainName: "X Layer Mainnet",
-            nativeCurrency: { name: "OKB", symbol: "OKB", decimals: 18 },
-            rpcUrls: ["https://rpc.xlayer.tech"],
-            blockExplorerUrls: ["https://www.oklink.com/xlayer"],
-          }],
-        });
-      }
-    }
-
-    provider = new ethers.BrowserProvider(window.ethereum);
+    await provider.send('eth_requestAccounts', []);
     signer = await provider.getSigner();
     userAddress = await signer.getAddress();
     contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
 
-    const bal = await provider.getBalance(userAddress);
-    document.getElementById("wallet-dot").classList.add("connected");
-    document.getElementById("wallet-addr").textContent = userAddress.slice(0,6)+"..."+userAddress.slice(-4);
-    document.getElementById("wallet-bal").textContent = parseFloat(ethers.formatEther(bal)).toFixed(3)+" OKB";
-    document.getElementById("connect-btn").textContent = "Connected";
-    document.getElementById("connect-btn").classList.add("connected");
+    const btn = document.getElementById('walletBtn');
+    btn.textContent = userAddress.slice(0,6)+'…'+userAddress.slice(-4);
+    btn.classList.add('connected');
 
-    // Show Admin tab only for contract owner
+    // Check if owner → show admin tab
     try {
       const ownerAddr = await contract.owner();
-      if (userAddress.toLowerCase() === ownerAddr.toLowerCase()) {
-        document.getElementById("admin-tab").style.display = "";
+      if (ownerAddr.toLowerCase() === userAddress.toLowerCase()) {
+        document.getElementById('admin-tab').style.display = '';
       }
-    } catch(e) { console.log("owner check:", e); }
+    } catch(e) { console.warn('owner() check failed:', e.message); }
 
-    loadStats();
+    loadMatches();
     loadLeaderboard();
-    showToast("Wallet connected ✓");
   } catch(e) {
-    showToast("Connection failed: "+e.message, true);
+    alert('Wallet connection failed: ' + e.message);
   }
 }
 
-// ── Read-only provider for viewing without wallet
-function getReadProvider() {
-  return new ethers.JsonRpcProvider(XLAYER_RPC);
+// ─── TABS ────────────────────────────────────────────────────────────────────
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
 }
 
-function getReadContract() {
-  if (contract) return contract;
-  return new ethers.Contract(CONTRACT_ADDRESS, ABI, getReadProvider());
-}
-
-// ── Stats ─────────────────────────────────────
-async function loadStats() {
-  try {
-    const c = getReadContract();
-    const [vol, players, matches] = await Promise.all([
-      c.totalVolume(), c.playerCount(), c.matchCount()
-    ]);
-    document.getElementById("stat-volume").textContent = parseFloat(ethers.formatEther(vol)).toFixed(1);
-    document.getElementById("stat-players").textContent = players.toString();
-    document.getElementById("stat-matches").textContent = matches.toString();
-  } catch(e) { console.log("stats error",e); }
-}
-
-// ── Matches ───────────────────────────────────
+// ─── LOAD MATCHES ────────────────────────────────────────────────────────────
 async function loadMatches() {
-  const container = document.getElementById("matches-container");
+  const grid = document.getElementById('matchesGrid');
+  if (!contract) { grid.innerHTML = '<div class="empty-state">Connect wallet to load matches…</div>'; return; }
   try {
-    const c = getReadContract();
-    const count = await c.matchCount();
-    if (count == 0n) {
-      container.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--muted);font-family:var(--font-mono);font-size:13px;">
-        No matches yet.<br><br>Go to ⚙️ Admin tab and click "Seed All Matches" to add the World Cup fixtures.
-      </div>`;
-      return;
+    const count = await contract.matchCount();
+    const n = Number(count);
+    if (n === 0) { grid.innerHTML = '<div class="empty-state">No matches seeded yet. Ask the admin to seed matches.</div>'; return; }
+    grid.innerHTML = '';
+    for (let i = 0; i < n; i++) {
+      const m = await contract.getMatch(i);
+      const statusNum = Number(m.status);
+      if (statusNum === 4) continue; // skip cancelled
+      grid.appendChild(buildMatchCard(i, m, statusNum));
     }
-    const matches = await c.getMatches(0, count);
-    container.innerHTML = "";
-    for (const m of matches) {
-      if (m.status == 3n || m.status == 4n) continue; // skip resolved/cancelled
-      container.appendChild(buildMatchCard(m));
-    }
-    if (container.innerHTML === "") {
-      container.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--muted);font-family:var(--font-mono);font-size:13px;">No open matches right now.</div>`;
-    }
+    if (grid.children.length === 0) grid.innerHTML = '<div class="empty-state">No active matches available.</div>';
   } catch(e) {
-    container.innerHTML = `<div style="padding:2rem;color:var(--red);font-family:var(--font-mono);font-size:12px;">Error loading matches: ${e.message}</div>`;
+    grid.innerHTML = '<div class="empty-state" style="color:var(--red)">Error loading matches: ' + e.message + '</div>';
   }
 }
 
-function buildMatchCard(m) {
-  const id = m.id.toString();
-  const statusMap = {0:"upcoming",1:"open",2:"closed",3:"resolved",4:"cancelled"};
-  const statusLabel = {0:"UPCOMING",1:"OPEN",2:"CLOSED",3:"RESOLVED",4:"CANCELLED"};
-  const statusNum = Number(m.status);
-  const div = document.createElement("div");
-  div.className = "match-card";
-  div.id = "match-"+id;
+function buildMatchCard(id, m, statusNum) {
+  const kickoff = new Date(Number(m.kickoff) * 1000);
+  const kickoffStr = kickoff.toLocaleDateString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'}) + ' UTC';
+  const homeEth = ethers.formatEther(m.homePool || 0n);
+  const drawEth = ethers.formatEther(m.drawPool || 0n);
+  const awayEth = ethers.formatEther(m.awayPool || 0n);
+  const isOpen = statusNum === 1;
 
-  const totalPool = parseFloat(ethers.formatEther(m.totalPool)).toFixed(2);
-  const homePool  = parseFloat(ethers.formatEther(m.totalHome)).toFixed(2);
-  const drawPool  = parseFloat(ethers.formatEther(m.totalDraw)).toFixed(2);
-  const awayPool  = parseFloat(ethers.formatEther(m.totalAway)).toFixed(2);
-  const kickoff   = new Date(Number(m.kickoffTime)*1000).toLocaleDateString("en",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
-
-  const insights = {
-    "Brazil": "Brazil lead possession metrics in qualifiers. Vinicius Jr. averaging 4.1 key passes. On-chain sentiment 58% favour home win.",
-    "France": "France form index: 87/100. Mbappé injury concerns persist but squad depth superior. Slight edge over Argentina.",
-    "England": "England vs Spain — heavyweight clash. England's defensive record vs top 10 teams: 60% clean sheets. Value on draw.",
-    "Portugal": "Portugal underdog pick: Japan's counter-attack rated top 3 in world. Cristiano factor + Bellingham-level threats on both sides.",
-    "Netherlands": "Netherlands vs USA — experience edge to Oranje. USA's young squad dangerous on transitions. Over 2.5 goals likely.",
-    "Morocco": "Morocco proven giant-killers. Mexico's attacking shape vulnerable to high press. Tight match expected."
-  };
-  const insight = insights[m.homeTeam] || "AI analysis loading — oracle is syncing with on-chain betting data for this match.";
-
-  div.innerHTML = `
+  const card = document.createElement('div');
+  card.className = 'match-card';
+  card.innerHTML = `
     <div class="match-meta">
-      <span class="match-group">GROUP STAGE · MATCH ${id}</span>
-      <span class="match-status ${statusMap[statusNum]}">${statusLabel[statusNum]} · ${kickoff}</span>
+      <span class="match-group">Match #${id}</span>
+      <span class="match-status ${STATUS_CLASSES[statusNum]}">${STATUS_LABELS[statusNum]}</span>
     </div>
-    <div class="teams">
-      <div class="team"><div class="team-flag">${m.homeFlag}</div><div class="team-name">${m.homeTeam}</div></div>
+    <div class="match-teams">
+      <div class="team"><div class="team-name">${m.home}</div></div>
       <div class="vs">VS</div>
-      <div class="team right"><div class="team-flag">${m.awayFlag}</div><div class="team-name">${m.awayTeam}</div></div>
+      <div class="team"><div class="team-name">${m.away}</div></div>
     </div>
-    <div class="ai-box">
-      <span class="ai-icon">🤖</span>
-      <span class="ai-text">${insight}</span>
+    <div class="match-kickoff">⏰ ${kickoffStr}</div>
+    <div class="match-pool">
+      <span class="pool-item">🏠 <span class="pool-val">${parseFloat(homeEth).toFixed(4)}</span> OKB</span>
+      <span>·</span>
+      <span class="pool-item">🤝 <span class="pool-val">${parseFloat(drawEth).toFixed(4)}</span> OKB</span>
+      <span>·</span>
+      <span class="pool-item">✈️ <span class="pool-val">${parseFloat(awayEth).toFixed(4)}</span> OKB</span>
     </div>
-    <div class="odds-grid">
-      <div class="odds-btn" id="odds-${id}-1" onclick="selectOdds('${id}',1,this)">
-        <div class="odds-label">Home Win</div>
-        <div class="odds-num">1.85</div>
-        <div class="odds-pool">${homePool} OKB</div>
-      </div>
-      <div class="odds-btn" id="odds-${id}-2" onclick="selectOdds('${id}',2,this)">
-        <div class="odds-label">Draw</div>
-        <div class="odds-num">3.20</div>
-        <div class="odds-pool">${drawPool} OKB</div>
-      </div>
-      <div class="odds-btn" id="odds-${id}-3" onclick="selectOdds('${id}',3,this)">
-        <div class="odds-label">Away Win</div>
-        <div class="odds-num">2.75</div>
-        <div class="odds-pool">${awayPool} OKB</div>
-      </div>
+    <div class="predict-row">
+      <select class="predict-select" id="outcome-${id}">
+        <option value="1">🏠 ${m.home} Win</option>
+        <option value="2">🤝 Draw</option>
+        <option value="3">✈️ ${m.away} Win</option>
+      </select>
+      <input class="stake-input" id="stake-${id}" type="number" value="0.001" min="0.001" step="0.001" placeholder="OKB">
+      <button class="predict-btn" ${isOpen ? '' : 'disabled'} onclick="placePrediction(${id})">
+        ${isOpen ? 'Predict' : statusNum === 0 ? 'Not Open' : statusNum === 2 ? 'Closed' : STATUS_LABELS[statusNum]}
+      </button>
     </div>
-    <div class="stake-row">
-      <input class="stake-input" id="stake-${id}" type="number" placeholder="Stake in OKB" min="0.001" step="0.001"/>
-      <button class="predict-btn" id="btn-${id}" onclick="placePrediction('${id}')" ${statusNum!==1?'disabled':''}>Predict ↗</button>
-    </div>
-    <div class="payout-est" id="est-${id}">Select outcome + enter stake to see estimated payout</div>
   `;
-
-  // Live payout estimate
-  const input = div.querySelector(`#stake-${id}`);
-  input.addEventListener("input", () => updateEstimate(id, m));
-
-  return div;
+  return card;
 }
 
-function selectOdds(matchId, choice, el) {
-  document.querySelectorAll(`[id^="odds-${matchId}-"]`).forEach(b => b.classList.remove("selected"));
-  el.classList.add("selected");
-  selectedOdds[matchId] = choice;
-  updateEstimate(matchId);
-}
-
-async function updateEstimate(matchId) {
-  const stakeInput = document.getElementById(`stake-${matchId}`);
-  const estEl = document.getElementById(`est-${matchId}`);
-  const choice = selectedOdds[matchId];
-  const stake = parseFloat(stakeInput.value);
-  if (!choice || !stake || stake < 0.001) {
-    estEl.innerHTML = "Select outcome + enter stake to see estimated payout";
-    return;
-  }
-  try {
-    const c = getReadContract();
-    const est = await c.estimatePayout(matchId, choice, ethers.parseEther(stake.toString()));
-    estEl.innerHTML = `Estimated payout: <span>${parseFloat(ethers.formatEther(est)).toFixed(4)} OKB</span>`;
-  } catch(e) { estEl.innerHTML = ""; }
-}
-
+// ─── PLACE PREDICTION ────────────────────────────────────────────────────────
 async function placePrediction(matchId) {
-  if (!signer) { showToast("Connect your wallet first", true); return; }
-  const choice = selectedOdds[matchId];
-  if (!choice) { showToast("Select an outcome first", true); return; }
-  const stakeVal = document.getElementById(`stake-${matchId}`).value;
-  if (!stakeVal || parseFloat(stakeVal) < 0.001) { showToast("Min stake is 0.001 OKB", true); return; }
-
-  const btn = document.getElementById(`btn-${matchId}`);
-  btn.disabled = true;
-  btn.textContent = "Confirming...";
-
+  if (!contract) { alert('Connect wallet first.'); return; }
+  const outcome = parseInt(document.getElementById('outcome-'+matchId).value);
+  const stakeVal = document.getElementById('stake-'+matchId).value;
+  if (!stakeVal || isNaN(parseFloat(stakeVal)) || parseFloat(stakeVal) <= 0) {
+    alert('Enter a valid stake amount.'); return;
+  }
   try {
-    const tx = await contract.predict(matchId, choice, { value: ethers.parseEther(stakeVal) });
-    showToast("Transaction sent — waiting for confirmation...");
+    const value = ethers.parseEther(stakeVal);
+    const tx = await contract.predict(matchId, outcome, { value });
+    alert('Prediction submitted! TX: ' + tx.hash + '\nWaiting for confirmation…');
     await tx.wait();
-    showToast("✅ Prediction placed on-chain!");
-    btn.textContent = "✓ Predicted";
-    loadStats();
+    alert('✅ Prediction confirmed!');
+    loadMatches();
   } catch(e) {
-    showToast("Error: "+(e.reason||e.message), true);
-    btn.disabled = false;
-    btn.textContent = "Predict ↗";
+    alert('Prediction failed: ' + (e.reason || e.message));
   }
 }
 
-// ── Leaderboard ───────────────────────────────
+// ─── LEADERBOARD ─────────────────────────────────────────────────────────────
 async function loadLeaderboard() {
+  const body = document.getElementById('lbBody');
+  if (!contract) return;
   try {
-    const c = getReadContract();
-    const [addrs, pts] = await c.getLeaderboard(10);
-    const container = document.getElementById("lb-container");
+    const [addrs, points] = await contract.getTopPlayers(20);
     if (addrs.length === 0) {
-      container.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--muted);font-family:var(--font-mono);font-size:13px;">No players yet — be the first to predict!</div>`;
+      body.innerHTML = '<div class="empty-state" style="padding:40px">No predictions placed yet.</div>';
       return;
     }
-    const colors = ["#2A2A4A","#2A3A2A","#3A2A2A","#2A3A3A","#3A2A3A"];
-    container.innerHTML = addrs.map((addr,i) => `
-      <div class="lb-row">
-        <div class="lb-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
-        <div class="lb-avatar" style="background:${colors[i%5]}">${addr.slice(2,4).toUpperCase()}</div>
-        <div class="lb-info">
-          <div class="lb-name">${addr.slice(0,6)}...${addr.slice(-4)}</div>
-        </div>
-        <div class="lb-right">
-          <div class="lb-pts">${pts[i].toString()}</div>
-          <div class="lb-streak">pts</div>
-        </div>
-      </div>
-    `).join("");
-
-    // Load user stats
-    if (userAddress) {
-      const stats = await c.getPlayerStats(userAddress);
-      document.getElementById("my-pts").textContent = stats.points.toString();
-      document.getElementById("my-preds").textContent = stats.totalPredictions.toString();
-      document.getElementById("my-streak").textContent = stats.streak.toString();
+    body.innerHTML = '';
+    for (let i = 0; i < addrs.length; i++) {
+      const stats = await contract.getUserStats(addrs[i]);
+      const staked = parseFloat(ethers.formatEther(stats.totalStaked)).toFixed(4);
+      const rankClass = i===0?'top1':i===1?'top2':i===2?'top3':'';
+      const row = document.createElement('div');
+      row.className = 'lb-row';
+      row.innerHTML = `
+        <div class="lb-rank ${rankClass}">${i+1}</div>
+        <div class="lb-addr">${addrs[i].slice(0,8)}…${addrs[i].slice(-6)}</div>
+        <div class="lb-val lb-pts">${points[i].toString()}</div>
+        <div class="lb-val">${stats.correctPredictions.toString()}/${stats.totalPredictions.toString()}</div>
+        <div class="lb-val">${staked} OKB</div>
+      `;
+      body.appendChild(row);
     }
-  } catch(e) { console.log("lb error",e); }
+  } catch(e) {
+    body.innerHTML = '<div class="empty-state" style="padding:40px;color:var(--red)">Error: '+e.message+'</div>';
+  }
 }
 
-// ── Oracle ────────────────────────────────────
+// ─── AI ORACLE ───────────────────────────────────────────────────────────────
 async function askOracle() {
-  const input = document.getElementById("oracle-input");
-  const q = input.value.trim();
+  const q = document.getElementById('oracleQ').value.trim();
   if (!q) return;
-  input.value = "";
-  document.getElementById("oracle-chips").style.display = "none";
-  await callOracle(q);
-}
-
-async function askChip(el, q) {
-  el.style.opacity = "0.4";
-  el.style.pointerEvents = "none";
-  await callOracle(q);
-}
-
-async function callOracle(question) {
-  const msgs = document.getElementById("oracle-msgs");
-  const userMsg = document.createElement("div");
-  userMsg.className = "msg user";
-  userMsg.textContent = question;
-  msgs.appendChild(userMsg);
-
-  const loadMsg = document.createElement("div");
-  loadMsg.className = "msg loading";
-  loadMsg.textContent = "⏳ Syncing with on-chain data...";
-  msgs.appendChild(loadMsg);
-  msgs.scrollTop = msgs.scrollHeight;
-
+  const resp = document.getElementById('oracleResp');
+  resp.textContent = 'Consulting the Oracle…';
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-calls': 'true' },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        system: `You are GoalOracle, an AI analyst for the 2026 FIFA World Cup prediction market deployed on X Layer blockchain (OKX's ZK-EVM L2). 
-Contract address: 0x6f2fad74009Ed11A764d6fd3871E52C585861E92
-You give sharp, confident 2-3 sentence match predictions and betting insights. Mention on-chain data, X Layer, or OKB where relevant. Be specific about teams, stats, and value opportunities. Never be vague.`,
-        messages: [{ role: "user", content: question }]
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 600,
+        system: 'You are GoalOracle, an expert AI analyst for the 2026 FIFA World Cup. Give sharp, insightful analysis. Be confident and specific. Reference real team form, key players, and tactical factors. Keep responses under 200 words.',
+        messages: [{ role: 'user', content: q }]
       })
     });
     const data = await res.json();
-    const answer = data.content?.find(b => b.type === "text")?.text || "Oracle is processing — try again.";
-    loadMsg.className = "msg ai";
-    loadMsg.textContent = answer;
+    resp.textContent = data.content?.[0]?.text || 'No response received.';
   } catch(e) {
-    loadMsg.className = "msg ai";
-    loadMsg.textContent = "Oracle is syncing with live match data. Please try again in a moment.";
+    resp.textContent = 'Oracle error: ' + e.message;
   }
-  msgs.scrollTop = msgs.scrollHeight;
 }
 
-// ── Admin: Seed ───────────────────────────────
-async function seedMatches() {
-  if (!signer) { showToast("Connect wallet first", true); return; }
-  const btn = document.getElementById("seed-btn");
-  const log = document.getElementById("seed-log");
-  btn.disabled = true;
-  btn.textContent = "⏳ Seeding...";
-  log.style.display = "block";
-  log.innerHTML = `Seeding ${MATCHES_TO_SEED.length} matches — ${MATCHES_TO_SEED.length * 2} transactions total...\n\n`;
+// ─── ADMIN: CANCEL ALL MATCHES ───────────────────────────────────────────────
+async function cancelAllMatches() {
+  if (!contract) { alert('Connect wallet first.'); return; }
+  const log = document.getElementById('cancelLog');
+  log.innerHTML = '<span class="log-info">Reading match count from contract…</span>';
 
-  let done = 0;
-  for (const m of MATCHES_TO_SEED) {
-    log.innerHTML += `[${done+1}/${MATCHES_TO_SEED.length}] ${m.home} vs ${m.away}... `;
-    log.scrollTop = log.scrollHeight;
-    try {
-      const tx = await contract.createMatch(m.home, m.away, m.hf, m.af, m.kickoff);
-      const receipt = await tx.wait();
-      const iface = new ethers.Interface(ABI);
-      let matchId = "?";
-      for (const log2 of receipt.logs) {
-        try {
-          const parsed = iface.parseLog(log2);
-          if (parsed.name === "MatchCreated") { matchId = parsed.args.matchId.toString(); break; }
-        } catch {}
-      }
-      const tx2 = await contract.openMatch(matchId);
-      await tx2.wait();
-      done++;
-      log.innerHTML += `✅ OPEN (ID #${matchId})\n`;
-    } catch(e) {
-      log.innerHTML += `❌ ${e.reason||e.message}\n`;
-    }
-    log.scrollTop = log.scrollHeight;
-  }
-  log.innerHTML += `\n✅ Done! ${done}/${MATCHES_TO_SEED.length} matches seeded.`;
-  btn.textContent = `✓ Seeded (${done}/${MATCHES_TO_SEED.length})`;
-  loadMatches();
-  loadStats();
-}
-
-async function cancelMatch() {
-  if (!signer) { showToast("Connect wallet first", true); return; }
-  const id = document.getElementById("cancel-id").value.trim();
-  if (id === "") { showToast("Enter a match ID", true); return; }
-  const log = document.getElementById("cancel-log");
-  log.style.display = "block";
-  log.innerHTML = `Cancelling match #${id}...`;
   try {
-    const tx = await contract.cancelMatch(id);
-    await tx.wait();
-    log.innerHTML = `✅ Match #${id} cancelled. Players can claim refunds.`;
-    loadMatches();
-  } catch(e) {
-    log.innerHTML = `❌ ${e.reason||e.message}`;
-  }
-}
+    const count = await contract.matchCount();
+    const n = Number(count);
+    if (n === 0) { log.innerHTML += '\n<span class="log-ok">No matches found on contract.</span>'; return; }
+    log.innerHTML += `\n<span class="log-info">Found ${n} match(es). Checking status…</span>`;
 
-async function cancelRange() {
-  if (!signer) { showToast("Connect wallet first", true); return; }
-  const log = document.getElementById("cancel-log");
-  log.style.display = "block";
-  log.innerHTML = "Reading all existing matches from contract...\n";
-  try {
-    const count = Number(await contract.matchCount());
-    if (count === 0) { log.innerHTML += "No matches found."; return; }
-    log.innerHTML += `Found ${count} match(es). Cancelling all active ones...\n\n`;
-    let done = 0;
-    for (let id = 0; id < count; id++) {
-      const m = await contract.getMatch(id);
-      const status = Number(m.status);
-      if (status === 3 || status === 4) {
-        log.innerHTML += `#${id} (${m.homeTeam} vs ${m.awayTeam}) already ${status===3?"resolved":"cancelled"} — skipping\n`;
+    let cancelled = 0;
+    let skipped = 0;
+    for (let i = 0; i < n; i++) {
+      const m = await contract.getMatch(i);
+      const statusNum = Number(m.status);
+      // Skip already resolved (3) or already cancelled (4)
+      if (statusNum === 3 || statusNum === 4) {
+        log.innerHTML += `\n<span style="color:#555">[${i}] ${m.home} vs ${m.away} — ${STATUS_LABELS[statusNum]}, skipping</span>`;
+        skipped++;
         continue;
       }
-      log.innerHTML += `Cancelling #${id} (${m.homeTeam} vs ${m.awayTeam})... `;
+      log.innerHTML += `\n<span class="log-info">[${i}] Cancelling ${m.home} vs ${m.away}…</span>`;
       log.scrollTop = log.scrollHeight;
       try {
-        const tx = await contract.cancelMatch(id);
+        const tx = await contract.cancelMatch(i);
         await tx.wait();
-        done++;
-        log.innerHTML += `✅\n`;
+        log.innerHTML += `\n<span class="log-ok">[${i}] ✅ Cancelled</span>`;
+        cancelled++;
       } catch(e) {
-        log.innerHTML += `❌ ${e.reason||e.message}\n`;
+        log.innerHTML += `\n<span class="log-err">[${i}] ❌ Error: ${e.reason||e.message}</span>`;
       }
       log.scrollTop = log.scrollHeight;
     }
-    log.innerHTML += `\n✅ Done! ${done} match(es) cancelled. Now click Seed All 16 Matches ↑`;
-    loadMatches();
+    log.innerHTML += `\n\n<span class="log-ok">Done — ${cancelled} cancelled, ${skipped} skipped. Now click Seed All 16 Matches ↑</span>`;
   } catch(e) {
-    log.innerHTML += `❌ Error: ${e.reason||e.message}`;
+    log.innerHTML += '\n<span class="log-err">Error: ' + e.message + '</span>';
   }
+  log.scrollTop = log.scrollHeight;
 }
 
+// ─── ADMIN: SEED ALL 16 MATCHES ──────────────────────────────────────────────
+async function seedMatches() {
+  if (!contract) { alert('Connect wallet first.'); return; }
+  const log = document.getElementById('seedLog');
+  log.innerHTML = '<span class="log-info">Starting — seeding 16 real World Cup 2026 Matchday 1 fixtures…</span>';
+  let ok = 0;
+  for (let i = 0; i < MATCHES_TO_SEED.length; i++) {
+    const m = MATCHES_TO_SEED[i];
+    log.innerHTML += `\n<span class="log-info">[${i+1}/${MATCHES_TO_SEED.length}] Creating ${m.home} vs ${m.away}…</span>`;
+    log.scrollTop = log.scrollHeight;
+    try {
+      const tx1 = await contract.createMatch(m.home, m.away, m.kickoff);
+      const receipt = await tx1.wait();
+      // Parse match ID from MatchCreated event
+      let matchId = null;
+      for (const ev of receipt.logs) {
+        try {
+          const parsed = contract.interface.parseLog(ev);
+          if (parsed && parsed.name === 'MatchCreated') { matchId = Number(parsed.args.matchId); break; }
+        } catch {}
+      }
+      if (matchId === null) matchId = i; // fallback
+      log.innerHTML += `\n<span style="color:#aaa">  created as match #${matchId}</span>`;
+      log.innerHTML += `\n<span class="log-info">  Opening match #${matchId}…</span>`;
+      log.scrollTop = log.scrollHeight;
+      const tx2 = await contract.openMatch(matchId);
+      await tx2.wait();
+      log.innerHTML += `\n<span class="log-ok">[${i+1}/${MATCHES_TO_SEED.length}] ✅ ${m.home} vs ${m.away} — OPEN</span>`;
+      ok++;
+    } catch(e) {
+      log.innerHTML += `\n<span class="log-err">[${i+1}/${MATCHES_TO_SEED.length}] ❌ ${m.home} vs ${m.away} — ${e.reason||e.message}</span>`;
+    }
+    log.scrollTop = log.scrollHeight;
+  }
+  log.innerHTML += `\n\n<span class="log-ok">✅ Done — ${ok}/${MATCHES_TO_SEED.length} matches seeded successfully!</span>`;
+  log.scrollTop = log.scrollHeight;
+  loadMatches();
+}
+
+// ─── ADMIN: RESOLVE MATCH ────────────────────────────────────────────────────
 async function resolveMatch() {
-  if (!signer) { showToast("Connect wallet first", true); return; }
-  const id = document.getElementById("resolve-id").value;
-  const result = document.getElementById("resolve-result").value;
-  const log = document.getElementById("resolve-log");
-  log.style.display = "block";
-  log.textContent = "Resolving...";
+  if (!contract) { alert('Connect wallet first.'); return; }
+  const idVal = document.getElementById('resolveId').value.trim();
+  const msg = document.getElementById('resolveMsg');
+  if (idVal === '' || isNaN(parseInt(idVal))) {
+    msg.innerHTML = '<span style="color:var(--red)">❌ Enter a valid Match ID number first.</span>';
+    return;
+  }
+  const matchId = parseInt(idVal);
+  const outcome = parseInt(document.getElementById('resolveOutcome').value);
+  msg.innerHTML = '<span style="color:var(--accent)">Resolving match #' + matchId + '…</span>';
   try {
-    try { await (await contract.closeMatch(id)).wait(); } catch {}
-    const tx = await contract.resolveMatch(id, result);
+    const tx = await contract.resolveMatch(matchId, outcome);
+    msg.innerHTML = '<span style="color:var(--accent)">Waiting for confirmation…</span>';
     await tx.wait();
-    log.textContent = `✅ Match #${id} resolved. Winners can now claim!`;
+    msg.innerHTML = '<span style="color:var(--green)">✅ Match #'+matchId+' resolved! Payouts triggered.</span>';
     loadMatches();
   } catch(e) {
-    log.textContent = "❌ " + (e.reason||e.message);
+    msg.innerHTML = '<span style="color:var(--red)">❌ ' + (e.reason||e.message) + '</span>';
   }
 }
-
-// ── Tabs ──────────────────────────────────────
-function switchTab(name, el) {
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-  document.getElementById("page-"+name).classList.add("active");
-  el.classList.add("active");
-  if (name === "leaderboard") loadLeaderboard();
-}
-
-// ── Toast ─────────────────────────────────────
-function showToast(msg, isError=false) {
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.className = "toast show" + (isError ? " error" : "");
-  setTimeout(() => t.classList.remove("show"), 3500);
-}
-
-// ── Init ──────────────────────────────────────
-loadStats();
-loadMatches();
 </script>
 </body>
 </html>
