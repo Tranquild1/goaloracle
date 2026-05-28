@@ -197,28 +197,31 @@ const ABI = [
   "function claimRefund(uint256)",
   "function createMatch(string,string,string,string,uint64) returns (uint256)",
   "function openMatch(uint256)",
+  "function closeMatch(uint256)",
+  "function resolveMatch(uint256,uint8)",
+  "function cancelMatch(uint256)",
   "event MatchCreated(uint256 indexed matchId,string home,string away,uint64 kickoff)",
 ];
 
 // World Cup 2026 matches to seed
 // All 16 real FIFA World Cup 2026 Group Stage Matchday 1 fixtures
 const MATCHES_TO_SEED = [
-  {home:"Mexico",      away:"South Africa", hf:"🇲🇽", af:"🇿🇦", kickoff:1781204400}, // Jun 11 — Group A
-  {home:"USA",         away:"Paraguay",     hf:"🇺🇸", af:"🇵🇾", kickoff:1781226000}, // Jun 12 — Group D
-  {home:"Canada",      away:"Bosnia-Herz",  hf:"🇨🇦", af:"🇧🇦", kickoff:1781305200}, // Jun 12 — Group B
-  {home:"South Korea", away:"Czechia",      hf:"🇰🇷", af:"🇨🇿", kickoff:1781316000}, // Jun 13 — Group A
-  {home:"Brazil",      away:"Morocco",      hf:"🇧🇷", af:"🇲🇦", kickoff:1781388000}, // Jun 13 — Group C
-  {home:"Australia",   away:"Turkiye",      hf:"🇦🇺", af:"🇹🇷", kickoff:1781398800}, // Jun 14 — Group D
-  {home:"Switzerland", away:"Ecuador",      hf:"🇨🇭", af:"🇪🇨", kickoff:1781460000}, // Jun 14 — Group E
-  {home:"Germany",     away:"Curacao",      hf:"🇩🇪", af:"🇨🇼", kickoff:1781474400}, // Jun 14 — Group E
-  {home:"Belgium",     away:"Egypt",        hf:"🇧🇪", af:"🇪🇬", kickoff:1781492400}, // Jun 15 — Group G
-  {home:"Spain",       away:"Cape Verde",   hf:"🇪🇸", af:"🇨🇻", kickoff:1781542800}, // Jun 15 — Group H
-  {home:"Netherlands", away:"Japan",        hf:"🇳🇱", af:"🇯🇵", kickoff:1781560800}, // Jun 15 — Group F
-  {home:"Argentina",   away:"Algeria",      hf:"🇦🇷", af:"🇩🇿", kickoff:1781629200}, // Jun 16 — Group J
-  {home:"France",      away:"Senegal",      hf:"🇫🇷", af:"🇸🇳", kickoff:1781647200}, // Jun 16 — Group I
-  {home:"Portugal",    away:"DR Congo",     hf:"🇵🇹", af:"🇨🇩", kickoff:1781715600}, // Jun 17 — Group K
-  {home:"England",     away:"Croatia",      hf:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", af:"🇭🇷", kickoff:1781726400}, // Jun 17 — Group L
-  {home:"Colombia",    away:"Ivory Coast",  hf:"🇨🇴", af:"🇨🇮", kickoff:1781737200}, // Jun 17 — Group K
+  {home:"Mexico",      away:"South Africa", hf:"🇲🇽", af:"🇿🇦", kickoff:1781204400},
+  {home:"USA",         away:"Paraguay",     hf:"🇺🇸", af:"🇵🇾", kickoff:1781226000},
+  {home:"Canada",      away:"Bosnia-Herz",  hf:"🇨🇦", af:"🇧🇦", kickoff:1781305200},
+  {home:"South Korea", away:"Czechia",      hf:"🇰🇷", af:"🇨🇿", kickoff:1781316000},
+  {home:"Brazil",      away:"Morocco",      hf:"🇧🇷", af:"🇲🇦", kickoff:1781388000},
+  {home:"Australia",   away:"Turkiye",      hf:"🇦🇺", af:"🇹🇷", kickoff:1781398800},
+  {home:"Switzerland", away:"Ecuador",      hf:"🇨🇭", af:"🇪🇨", kickoff:1781460000},
+  {home:"Germany",     away:"Curacao",      hf:"🇩🇪", af:"🇨🇼", kickoff:1781474400},
+  {home:"Belgium",     away:"Egypt",        hf:"🇧🇪", af:"🇪🇬", kickoff:1781492400},
+  {home:"Spain",       away:"Cape Verde",   hf:"🇪🇸", af:"🇨🇻", kickoff:1781542800},
+  {home:"Netherlands", away:"Japan",        hf:"🇳🇱", af:"🇯🇵", kickoff:1781560800},
+  {home:"Argentina",   away:"Algeria",      hf:"🇦🇷", af:"🇩🇿", kickoff:1781629200},
+  {home:"France",      away:"Senegal",      hf:"🇫🇷", af:"🇸🇳", kickoff:1781647200},
+  {home:"Portugal",    away:"DR Congo",     hf:"🇵🇹", af:"🇨🇩", kickoff:1781715600},
+  {home:"England",     away:"Croatia",      hf:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", af:"🇭🇷", kickoff:1781726400},
+  {home:"Colombia",    away:"Ivory Coast",  hf:"🇨🇴", af:"🇨🇮", kickoff:1781737200},
 ];
 </script>
 
@@ -318,36 +321,18 @@ const MATCHES_TO_SEED = [
 
 <!-- ADMIN -->
 <div id="page-admin" class="page">
-  <p class="section-label">Admin Panel — Owner Only</p>
-
-  <!-- SEED -->
+  <p class="section-label">Admin Panel — Seed matches</p>
   <div class="seed-card">
-    <div class="seed-title">🌱 SEED WORLD CUP MATCHES</div>
-    <div class="seed-desc">Creates and opens all 16 Group Stage Matchday 1 fixtures on-chain — every group, all the big teams. Requires 32 wallet confirmations (2 per match). Watch the progress log below.</div>
-    <button class="seed-btn" id="seed-btn" onclick="seedMatches()">🚀 Seed All 16 Matches</button>
+    <div class="seed-title">SEED WORLD CUP MATCHES</div>
+    <div class="seed-desc">This will create and open all 6 Group Stage matches on-chain. Only the contract owner can do this. Make sure your wallet is connected and is the deployer address.</div>
+    <button class="seed-btn" id="seed-btn" onclick="seedMatches()">🚀 Seed All Matches</button>
     <div class="seed-log" id="seed-log"></div>
   </div>
-
-  <!-- CANCEL -->
   <div class="seed-card">
-    <div class="seed-title">❌ CANCEL A MATCH</div>
-    <div class="seed-desc">Cancel a match by ID (e.g. enter 0, 1, 2...). All players who staked on that match can claim a full refund. Use this to remove incorrect or duplicate matches.</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-      <input id="cancel-id" placeholder="Match ID (0,1,2...)" type="number" min="0" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:3px;font-family:var(--font-mono);font-size:13px;width:180px;outline:none;"/>
-      <button class="seed-btn" style="background:#c0392b;" onclick="cancelMatch()">Cancel Match</button>
-    </div>
+    <div class="seed-title">RESOLVE A MATCH</div>
+    <div class="seed-desc">After a match ends, enter the match ID and result to trigger payouts.</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="seed-btn" style="background:#7f1d1d;font-size:12px;" onclick="cancelRange()">Cancel Matches 0–5 (clear old seeds)</button>
-    </div>
-    <div class="seed-log" id="cancel-log"></div>
-  </div>
-
-  <!-- RESOLVE -->
-  <div class="seed-card">
-    <div class="seed-title">✅ RESOLVE A MATCH</div>
-    <div class="seed-desc">After a match ends, enter the Match ID and result to trigger payouts for all winners.</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <input id="resolve-id" placeholder="Match ID (0,1,2...)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:3px;font-family:var(--font-mono);font-size:13px;width:180px;outline:none;"/>
+      <input id="resolve-id" placeholder="Match ID (0,1,2...)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:3px;font-family:var(--font-mono);font-size:13px;width:160px;outline:none;"/>
       <select id="resolve-result" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:3px;font-family:var(--font-mono);font-size:13px;outline:none;">
         <option value="1">Home Win</option>
         <option value="2">Draw</option>
@@ -415,7 +400,7 @@ async function connectWallet() {
     document.getElementById("connect-btn").textContent = "Connected";
     document.getElementById("connect-btn").classList.add("connected");
 
-    // Show Admin tab only if connected wallet is the contract owner
+    // Show Admin tab only for contract owner
     try {
       const ownerAddr = await contract.owner();
       if (userAddress.toLowerCase() === ownerAddr.toLowerCase()) {
@@ -720,8 +705,7 @@ async function seedMatches() {
     }
     log.scrollTop = log.scrollHeight;
   }
-
-  log.innerHTML += `\n✅ Done! ${done}/${MATCHES_TO_SEED.length} matches seeded successfully.`;
+  log.innerHTML += `\n✅ Done! ${done}/${MATCHES_TO_SEED.length} matches seeded.`;
   btn.textContent = `✓ Seeded (${done}/${MATCHES_TO_SEED.length})`;
   loadMatches();
   loadStats();
@@ -737,7 +721,7 @@ async function cancelMatch() {
   try {
     const tx = await contract.cancelMatch(id);
     await tx.wait();
-    log.innerHTML = `✅ Match #${id} cancelled. Players can now claim refunds.`;
+    log.innerHTML = `✅ Match #${id} cancelled. Players can claim refunds.`;
     loadMatches();
   } catch(e) {
     log.innerHTML = `❌ ${e.reason||e.message}`;
@@ -748,21 +732,36 @@ async function cancelRange() {
   if (!signer) { showToast("Connect wallet first", true); return; }
   const log = document.getElementById("cancel-log");
   log.style.display = "block";
-  log.innerHTML = "Cancelling matches 0–5...\n";
-  for (let id = 0; id <= 5; id++) {
-    log.innerHTML += `Cancelling match #${id}... `;
-    log.scrollTop = log.scrollHeight;
-    try {
-      const tx = await contract.cancelMatch(id);
-      await tx.wait();
-      log.innerHTML += `✅\n`;
-    } catch(e) {
-      log.innerHTML += `❌ ${e.reason||e.message}\n`;
+  log.innerHTML = "Reading all existing matches from contract...\n";
+  try {
+    const count = Number(await contract.matchCount());
+    if (count === 0) { log.innerHTML += "No matches found."; return; }
+    log.innerHTML += `Found ${count} match(es). Cancelling all active ones...\n\n`;
+    let done = 0;
+    for (let id = 0; id < count; id++) {
+      const m = await contract.getMatch(id);
+      const status = Number(m.status);
+      if (status === 3 || status === 4) {
+        log.innerHTML += `#${id} (${m.homeTeam} vs ${m.awayTeam}) already ${status===3?"resolved":"cancelled"} — skipping\n`;
+        continue;
+      }
+      log.innerHTML += `Cancelling #${id} (${m.homeTeam} vs ${m.awayTeam})... `;
+      log.scrollTop = log.scrollHeight;
+      try {
+        const tx = await contract.cancelMatch(id);
+        await tx.wait();
+        done++;
+        log.innerHTML += `✅\n`;
+      } catch(e) {
+        log.innerHTML += `❌ ${e.reason||e.message}\n`;
+      }
+      log.scrollTop = log.scrollHeight;
     }
-    log.scrollTop = log.scrollHeight;
+    log.innerHTML += `\n✅ Done! ${done} match(es) cancelled. Now click Seed All 16 Matches ↑`;
+    loadMatches();
+  } catch(e) {
+    log.innerHTML += `❌ Error: ${e.reason||e.message}`;
   }
-  log.innerHTML += "\nDone! Now click Seed All 16 Matches.";
-  loadMatches();
 }
 
 async function resolveMatch() {
