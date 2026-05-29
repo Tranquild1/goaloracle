@@ -419,9 +419,9 @@ const TEAM_STRENGTH = {
 <div id="page-oracle" class="page">
   <p class="section-label">Ask the AI oracle</p>
   <div class="oracle-card">
-    <button class="oracle-settings-btn" onclick="openApiKeyModal()">⚙ Settings</button>
+    <button class="oracle-settings-btn" id="oracle-settings-btn" style="display:none;" onclick="openApiKeyModal()">⚙ Settings</button>
     <div id="oracle-nokey-notice" class="oracle-notice" style="display:none;">
-      <div class="apikey-notice">⚠ &nbsp;Oracle not configured. <a href="#" onclick="openApiKeyModal();return false;">Click ⚙ Settings above</a> to choose a provider (Groq free tier recommended).</div>
+      <div class="apikey-notice">⚠ &nbsp;Oracle is temporarily unavailable. Please try again shortly.</div>
     </div>
     <div class="oracle-msgs" id="oracle-msgs">
       <div class="msg ai">Welcome to GoalOracle. I analyse team form, head-to-head records, injury data, and on-chain betting flows to give you an edge on the 2026 World Cup. Ask me anything.</div>
@@ -520,36 +520,17 @@ const TEAM_STRENGTH = {
   </div>
 </div>
 
-<!-- API KEY MODAL -->
+<!-- ORACLE ADMIN MODAL (admin wallet only) -->
 <div class="apikey-overlay" id="apikey-overlay" onclick="if(event.target===this)closeApiKeyModal()">
   <div class="apikey-box">
-    <div class="apikey-title">⚙️ ORACLE SETTINGS</div>
+    <div class="apikey-title">🤖 ORACLE STATUS</div>
     <div class="apikey-desc">
-      Choose how the AI Oracle connects. The recommended option uses a <strong>server-side proxy</strong> so no API key is exposed to users.<br><br>
-      <strong style="color:var(--green)">Option A — Server Proxy (Recommended)</strong><br>
-      Deploy <code style="color:var(--green)">/api/oracle.js</code> on Vercel with your <code style="color:var(--green)">ANTHROPIC_API_KEY</code> env var. No key needed by users.<br><br>
-      <strong style="color:#A89EE8">Option B — Groq (Free, no limit issues)</strong><br>
-      Get a free key at <a href="https://console.groq.com" target="_blank">console.groq.com</a> — generous free tier, very fast.<br><br>
-      <strong style="color:var(--muted)">Option C — Direct Anthropic</strong><br>
-      Your own <a href="https://console.anthropic.com/settings/keys" target="_blank">Anthropic key</a>, stored only in your browser.
-    </div>
-    <div style="margin-bottom:10px;">
-      <label style="font-size:11px;color:var(--muted);font-family:var(--font-mono);display:block;margin-bottom:6px;">PROVIDER</label>
-      <select id="apikey-provider" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:3px;font-family:var(--font-mono);font-size:13px;outline:none;margin-bottom:10px;" onchange="updateProviderHint()">
-        <option value="proxy">🔒 Server Proxy (Vercel — no key needed)</option>
-        <option value="groq">⚡ Groq (Free API key)</option>
-        <option value="anthropic">🤖 Anthropic (Direct)</option>
-      </select>
-    </div>
-    <div id="apikey-key-row">
-      <input class="apikey-input" id="apikey-input" type="password" placeholder="Paste API key here..." autocomplete="off"/>
-    </div>
-    <div id="apikey-proxy-hint" style="display:none;background:rgba(0,201,123,0.08);border:1px solid rgba(0,201,123,0.2);border-radius:3px;padding:10px 14px;font-size:12px;color:var(--green);margin-bottom:10px;line-height:1.6;">
-      ✅ Using server proxy at <code>/api/oracle</code>. No key needed — just deploy the Vercel function below and you're done.
+      The AI Oracle runs via a server-side Groq API key set in your Vercel environment variables. Users never see the key.<br><br>
+      <strong style="color:var(--green)">Status:</strong> <span style="color:var(--green)">✅ Active — /api/oracle is live</span><br><br>
+      To update the key: go to your <strong>Vercel dashboard → Settings → Environment Variables → GROQ_API_KEY</strong>.
     </div>
     <div class="apikey-row">
-      <button class="apikey-cancel" onclick="closeApiKeyModal()">Cancel</button>
-      <button class="apikey-save" onclick="saveApiKey()">Save & Activate ↗</button>
+      <button class="apikey-save" onclick="closeApiKeyModal()">Close</button>
     </div>
   </div>
 </div>
@@ -614,6 +595,7 @@ async function connectWallet() {
       const ownerAddr = await contract.owner();
       if (userAddress.toLowerCase() === ownerAddr.toLowerCase()) {
         document.getElementById("admin-tab").style.display = "";
+        document.getElementById("oracle-settings-btn").style.display = "";
         loadMatches(); // reload so delete buttons appear on cards
       }
     } catch(e) { console.log("owner check:", e); }
@@ -871,16 +853,8 @@ async function askChip(el, q) {
 }
 
 async function callOracle(question) {
-  const provider = localStorage.getItem("oracle_provider") || "";
-  const apiKey   = localStorage.getItem("oracle_api_key") || "";
-
-  // Need config unless using proxy
-  if (!provider || (provider !== "proxy" && !apiKey)) {
-    openApiKeyModal();
-    return;
-  }
-
   const msgs = document.getElementById("oracle-msgs");
+
   const userMsg = document.createElement("div");
   userMsg.className = "msg user";
   userMsg.textContent = question;
@@ -892,117 +866,34 @@ async function callOracle(question) {
   msgs.appendChild(loadMsg);
   msgs.scrollTop = msgs.scrollHeight;
 
-  const SYSTEM = `You are GoalOracle, an AI analyst for the 2026 FIFA World Cup prediction market deployed on X Layer blockchain (OKX's ZK-EVM L2). Contract: 0x6f2fad74009Ed11A764d6fd3871E52C585861E92. Give sharp, confident 2-3 sentence match predictions and betting insights. Mention on-chain data, X Layer, or OKB where relevant. Be specific about teams, stats, and value opportunities. Keep responses concise and punchy.`;
-
   try {
-    let answer = "";
-
-    if (provider === "proxy") {
-      // ── Vercel serverless proxy ──────────────────
-      const res = await fetch("/api/oracle", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question, system: SYSTEM })
-      });
-      const data = await res.json();
-      answer = data.answer || data.error || "No response — check your /api/oracle function.";
-
-    } else if (provider === "groq") {
-      // ── Groq (free tier, fast) ───────────────────
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          max_tokens: 600,
-          messages: [
-            { role: "system", content: SYSTEM },
-            { role: "user", content: question }
-          ]
-        })
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error.message);
-      answer = data.choices?.[0]?.message?.content || "No response.";
-
-    } else {
-      // ── Direct Anthropic ─────────────────────────
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true"
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 600,
-          system: SYSTEM,
-          messages: [{ role: "user", content: question }]
-        })
-      });
-      const data = await res.json();
-      if (data.error) {
-        if (data.error.type === "authentication_error") throw new Error("Invalid API key.");
-        throw new Error(data.error.message);
-      }
-      answer = data.content?.find(b => b.type === "text")?.text || "No response.";
-    }
-
+    const res = await fetch("/api/oracle", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
     loadMsg.className = "msg ai";
-    loadMsg.textContent = answer;
+    loadMsg.textContent = data.answer || "No response — please try again.";
   } catch(e) {
     loadMsg.className = "msg ai";
-    loadMsg.textContent = `❌ ${e.message}`;
+    loadMsg.textContent = "❌ Oracle unavailable. Try again shortly.";
+    console.error("Oracle error:", e);
   }
   msgs.scrollTop = msgs.scrollHeight;
 }
 
-// ── API Key modal ─────────────────────────────
-function updateProviderHint() {
-  const sel = document.getElementById("apikey-provider").value;
-  const keyRow = document.getElementById("apikey-key-row");
-  const proxyHint = document.getElementById("apikey-proxy-hint");
-  const input = document.getElementById("apikey-input");
-  if (sel === "proxy") {
-    keyRow.style.display = "none";
-    proxyHint.style.display = "block";
-  } else {
-    keyRow.style.display = "block";
-    proxyHint.style.display = "none";
-    input.placeholder = sel === "groq" ? "gsk_..." : "sk-ant-api03-...";
-  }
-}
-
+// ── Oracle Settings (admin only) ──────────────
 function openApiKeyModal() {
-  const overlay = document.getElementById("apikey-overlay");
-  const sel = document.getElementById("apikey-provider");
-  const input = document.getElementById("apikey-input");
-  const savedProvider = localStorage.getItem("oracle_provider") || "proxy";
-  const savedKey = localStorage.getItem("oracle_api_key") || "";
-  sel.value = savedProvider;
-  input.value = savedKey;
-  updateProviderHint();
-  overlay.classList.add("open");
+  document.getElementById("apikey-overlay").classList.add("open");
 }
-
 function closeApiKeyModal() {
   document.getElementById("apikey-overlay").classList.remove("open");
 }
-
 function saveApiKey() {
-  const provider = document.getElementById("apikey-provider").value;
-  const val = document.getElementById("apikey-input").value.trim();
-  if (provider !== "proxy" && !val) { showToast("Enter an API key first", true); return; }
-  localStorage.setItem("oracle_provider", provider);
-  if (val) localStorage.setItem("oracle_api_key", val);
   closeApiKeyModal();
-  document.getElementById("oracle-nokey-notice").style.display = "none";
-  showToast("✓ Oracle configured — ask away!");
+  showToast("✓ Settings saved");
 }
 
 // ── Flag Picker ────────────────────────────────
@@ -1279,15 +1170,6 @@ function showToast(msg, isError=false) {
 // ── Init ──────────────────────────────────────
 loadStats();
 loadMatches();
-// Show Oracle notice if not configured
-(function initOracleNotice() {
-  const provider = localStorage.getItem("oracle_provider");
-  const key = localStorage.getItem("oracle_api_key");
-  if (!provider && !key) {
-    const el = document.getElementById("oracle-nokey-notice");
-    if (el) el.style.display = "block";
-  }
-})();
 </script>
 </body>
 </html>
